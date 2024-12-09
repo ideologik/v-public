@@ -1,14 +1,29 @@
-import axios from "axios";
+import axiosClient from "./axiosClient";
 import { saveToken } from "../utils/auth";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+interface UserResponse {
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  user_password: string;
+  user_token: string;
+  user_tokenExpires: string;
+}
 
-export const loginApi = async (email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/auth/login`, {
-    email,
-    password,
-  });
-  const { token } = response.data;
-  saveToken(token);
-  return token;
+export const loginApi = async (
+  email: string,
+  password: string
+): Promise<string> => {
+  const encodedPassword = btoa(password);
+
+  const data = (await axiosClient.get("/users/login", {
+    params: {
+      email,
+      password: encodedPassword,
+    },
+  })) as UserResponse;
+
+  const { user_token } = data;
+  saveToken(user_token);
+  return user_token;
 };

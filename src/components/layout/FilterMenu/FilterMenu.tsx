@@ -1,26 +1,26 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useFilterStore } from "../../../store/filterStore";
 
 const FilterMenu: React.FC = () => {
+  const { filtersOpen } = useFilterStore();
+
   return (
     <Box
       sx={{
         width: 250,
         backgroundColor: "#ffffff",
-        border: "1px solid #ccc",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        p: 2,
-        zIndex: 10,
+        borderLeft: "1px solid #ccc",
+        height: "100%",
+        display: filtersOpen ? "block" : "none",
+        padding: 2,
       }}
     >
       <Typography variant="h6" gutterBottom>
         Filtros
       </Typography>
-      {/* Aquí irían inputs, selects, sliders, etc. para filtrar */}
+      {/* Aquí van tus controles de filtrado (categoría, precio, etc.) */}
     </Box>
   );
 };

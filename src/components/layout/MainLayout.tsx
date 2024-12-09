@@ -1,31 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { Outlet } from "react-router-dom";
+import { Box } from "@mui/material";
 import Header from "./Header/Header";
-import Sidebar from "./Sidebar/Sidebar";
 import FilterMenu from "./FilterMenu/FilterMenu";
 
-import Box from "@mui/material/Box";
+// Este Layout pondrá el Header arriba, el contenido principal a la izquierda
+// y el menú de filtros a la derecha, siendo el menú de filtros toggleable.
 
 const MainLayout = () => {
-  const [showFilterMenu, setShowFilterMenu] = useState<boolean>(false);
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header onToggleFilterMenu={() => setShowFilterMenu(!showFilterMenu)} />
+      <Header />
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        <Sidebar />
+        {/* Contenido principal ocupando el espacio restante */}
         <Box
-          sx={{
-            flex: 1,
-            overflow: "auto",
-            position: "relative",
-            p: 2,
-            backgroundColor: "background.default",
-          }}
+          sx={{ flex: 1, overflow: "auto", backgroundColor: "#DDDDDD", p: 2 }}
         >
-          {showFilterMenu && <FilterMenu />}
           <Outlet />
         </Box>
+
+        {/* Menú de filtros a la derecha */}
+        <FilterMenu />
       </Box>
     </Box>
   );
