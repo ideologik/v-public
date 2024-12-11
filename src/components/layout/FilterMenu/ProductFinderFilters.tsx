@@ -333,7 +333,7 @@ const ProductFinderFilters: React.FC = () => {
                     variant="contained"
                     color="primary"
                     sx={{ height: "46px" }}
-                    onClick={handleSearch}
+                    // onClick={handleSearch}
                   >
                     Search
                   </Button>

@@ -39,7 +39,7 @@ export const getProductDetails = async (productId: string | number) => {
 export const getProductFinderCategories = async (includeChild = true) => {
   try {
     return await axiosClient.get(
-      `/io/ProductFinder/Categories?include_child=${includeChild}`
+      `/ProductFinder/Categories?include_child=${includeChild}`
     );
   } catch (error) {
     console.error("Error fetching categories:", error);

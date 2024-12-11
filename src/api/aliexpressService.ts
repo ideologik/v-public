@@ -19,7 +19,7 @@ export const aliExpressFindByImage = async (imageUrl: string) => {
   try {
     // Ajustar según si la API requiere body o query param
     return await axiosClient.post(
-      `/io/ProductFinder/AliExpressFindByImage?image_url=${encodeURIComponent(
+      `/ProductFinder/AliExpressFindByImage?image_url=${encodeURIComponent(
         imageUrl
       )}`
     );
