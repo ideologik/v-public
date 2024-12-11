@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { useProductFinderFilterStore } from "../../../store/productFinderFilterStore";
 
-// import { getProducts } from "../../../../api/productFinderService"; // Ajustar según tu API real
+// Imagina que tienes un servicio real que llama a la API:
+import { getProductsFinder } from "../../../api/productFinderService";
 
 export const ProductFinderPage: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -22,17 +23,27 @@ export const ProductFinderPage: React.FC = () => {
     const fetchProducts = async () => {
       if (!isCategoriesLoaded) return;
 
-      // const data = await getProducts({
-      //   searchText,
-      //   AmazonCategoryId: categoryId,
-      //   AmazonSubCategoryId: subCategoryId,
-      //   AmazonThirdCategoryId: thirdLevelCategoryId,
-      //   priceFrom: priceRangeSelected[0],
-      //   priceTo: priceRangeSelected[1],
-      //   sort_by: sortOption,
-      // });
-      const data: any[] = [];
-      setProducts(data);
+      // Llama a la API con los filtros actuales
+      const params = {
+        // Ajusta estos nombres según los requerimientos de tu API
+        searchText: searchText || "",
+        AmazonCategoryId: categoryId || undefined,
+        AmazonSubCategoryId: subCategoryId || undefined,
+        AmazonThirdCategoryId: thirdLevelCategoryId || undefined,
+        priceFrom: priceRangeSelected[0],
+        priceTo: priceRangeSelected[1],
+        sort_by: sortOption, // Ajusta el tipo según tu API
+      };
+
+      try {
+        // getProductsFinder podría devolver un objeto { total_records, data: [...] }
+        const data = await getProductsFinder(params);
+        // Asumiendo que data.data es el array de productos
+        setProducts(data.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      }
     };
     fetchProducts();
   }, [
@@ -51,15 +62,19 @@ export const ProductFinderPage: React.FC = () => {
         Product Finder
       </Typography>
       <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-        {products.map((product) => (
-          <Paper key={product.id} sx={{ p: 2, width: 200 }}>
-            <Typography variant="h6">{product.name}</Typography>
-            <Typography variant="body2">Price: {product.price}</Typography>
-            <Typography variant="body2">
-              Sold last month: {product.soldLastMonth}
-            </Typography>
-          </Paper>
-        ))}
+        {products.length === 0 ? (
+          <Typography variant="body1">No products found</Typography>
+        ) : (
+          products.map((product) => (
+            <Paper key={product.id} sx={{ p: 2, width: 200 }}>
+              <Typography variant="h6">{product.name}</Typography>
+              <Typography variant="body2">Price: {product.price}</Typography>
+              <Typography variant="body2">
+                Sold last month: {product.soldLastMonth}
+              </Typography>
+            </Paper>
+          ))
+        )}
       </Box>
     </Box>
   );
