@@ -37,7 +37,7 @@ axiosClient.interceptors.response.use(
 
     const status = error.response.status;
     switch (status) {
-      case 401:
+      case 401: {
         // Token inválido o expirado
         // Limpia el token, actualiza estado global y redirige a login
         removeToken();
@@ -45,6 +45,7 @@ axiosClient.interceptors.response.use(
         authStore.logout();
         window.location.href = "/login";
         break;
+      }
 
       case 403:
         window.location.href = "/unauthorized";
