@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -9,11 +8,12 @@ export const ProductFinderPage: React.FC = () => {
   const [products, setProducts] = useState<ProductFinderProduct[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
-      const data: any[] = []; // await getProducts();
+    const fetchData = async () => {
+      // TODO: Implement getProducts() or similar
+      const data: ProductFinderProduct[] = [];
       setProducts(data);
     };
-    fetch();
+    fetchData();
   }, []);
 
   return (
@@ -26,10 +26,10 @@ export const ProductFinderPage: React.FC = () => {
           <Paper key={product.id as string} sx={{ p: 2, width: 200 }}>
             <Typography variant="h6">{product.name as string}</Typography>
             <Typography variant="body2">
-              Precio: {product.price as number}
+              Price: {product.price as number}
             </Typography>
             <Typography variant="body2">
-              Comprados el mes pasado: {product.soldLastMonth as number}
+              Sold last month: {product.soldLastMonth as number}
             </Typography>
           </Paper>
         ))}
