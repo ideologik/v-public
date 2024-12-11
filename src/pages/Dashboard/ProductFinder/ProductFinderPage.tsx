@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getProducts } from "../../../api/productService";
+
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -10,7 +10,7 @@ export const ProductFinderPage: React.FC = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      const data = await getProducts();
+      const data: any[] = []; // await getProducts();
       setProducts(data);
     };
     fetch();

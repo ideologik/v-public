@@ -26,7 +26,6 @@ axiosClient.interceptors.request.use(
 // Interceptor para respuestas: maneja estados
 axiosClient.interceptors.response.use(
   (response) => {
-    // Caso exitoso: simplemente retorna la data (o response si prefieres)
     return response.data;
   },
   (error) => {
@@ -48,12 +47,10 @@ axiosClient.interceptors.response.use(
         break;
 
       case 403:
-        // Acceso prohibido, opcional: redirige a otra página
         window.location.href = "/unauthorized";
         break;
 
       case 404:
-        // Página no encontrada
         window.location.href = "/notFound";
         break;
 
