@@ -1,3 +1,4 @@
+// src/store/productFinderFilterStore.ts
 import { create } from "zustand";
 
 interface ProductFinderFilterState {
@@ -12,6 +13,7 @@ interface ProductFinderFilterState {
   searchText: string;
   sortOption: string;
   isCategoriesLoaded: boolean;
+  lastLoadedAt: number | null; // Nuevo: Marca de tiempo de la última carga de datos
 
   setCategories: (categories: any[]) => void;
   setSubCategories: (sub: any[]) => void;
@@ -24,6 +26,7 @@ interface ProductFinderFilterState {
   setSearchText: (text: string) => void;
   setSortOption: (option: string) => void;
   setIsCategoriesLoaded: (loaded: boolean) => void;
+  setLastLoadedAt: (timestamp: number | null) => void;
 }
 
 export const useProductFinderFilterStore = create<ProductFinderFilterState>(
@@ -39,6 +42,7 @@ export const useProductFinderFilterStore = create<ProductFinderFilterState>(
     searchText: "",
     sortOption: "0",
     isCategoriesLoaded: false,
+    lastLoadedAt: null,
 
     setCategories: (categories) => set({ categories }),
     setSubCategories: (sub) => set({ subCategories: sub }),
@@ -51,5 +55,6 @@ export const useProductFinderFilterStore = create<ProductFinderFilterState>(
     setSearchText: (text) => set({ searchText: text }),
     setSortOption: (option) => set({ sortOption: option }),
     setIsCategoriesLoaded: (loaded) => set({ isCategoriesLoaded: loaded }),
+    setLastLoadedAt: (timestamp) => set({ lastLoadedAt: timestamp }),
   })
 );

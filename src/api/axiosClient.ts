@@ -1,5 +1,5 @@
-// src/api/axiosClient.ts
-import axios from "axios";
+// axiosClient.ts
+import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
 import { getToken, removeToken } from "../utils/auth";
 import { useAuthStore } from "../store/authStore";
 
@@ -18,19 +18,16 @@ axiosClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Interceptor para respuestas: maneja estados
 axiosClient.interceptors.response.use(
   (response) => {
-    return response.data;
+    return response.data; // Aquí ya devolvemos data directamente
   },
   (error) => {
     if (!error.response) {
-      // Error de red, servidor caído, etc.
       console.error("Network/Server error", error);
       return Promise.reject(error);
     }
@@ -38,8 +35,6 @@ axiosClient.interceptors.response.use(
     const status = error.response.status;
     switch (status) {
       case 401: {
-        // Token inválido o expirado
-        // Limpia el token, actualiza estado global y redirige a login
         removeToken();
         const authStore = useAuthStore.getState();
         authStore.logout();
@@ -58,16 +53,24 @@ axiosClient.interceptors.response.use(
       case 500:
       case 502:
       case 503:
-        // Error de servidor
         console.error("Server error", error.response.data);
         break;
 
       default:
-        console.error("Error de API no manejado", error.response.data);
+        console.error("Unhandled API error", error.response.data);
     }
 
     return Promise.reject(error);
   }
 );
 
-export default axiosClient;
+// Ahora redefinimos la interfaz del axiosClient para que sus métodos usen genéricos y retornen T directamente.
+interface CustomAxiosInstance extends AxiosInstance {
+  get<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
+}
+
+// Hacemos un cast del axiosClient a nuestro tipo CustomAxiosInstance
+export default axiosClient as CustomAxiosInstance;

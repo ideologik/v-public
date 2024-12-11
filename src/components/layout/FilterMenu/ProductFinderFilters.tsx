@@ -11,11 +11,10 @@ import {
   TextField,
   CircularProgress,
   Button,
-  Slider,
   Box,
+  Slider,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-
 import {
   getProductFinderCategories,
   getProductFinderSubCategories,
@@ -23,8 +22,16 @@ import {
 } from "../../../api/productFinderService";
 import { useProductFinderFilterStore } from "../../../store/productFinderFilterStore";
 
-// Recursive function to remove duplicate categories
-function removeDuplicateCategories(categories: any[], seenIds = new Set()) {
+interface Category {
+  categoryId: number;
+  category: string; // Ajusta según tus datos
+  subCategories: Category[];
+}
+
+function removeDuplicateCategories(
+  categories: Category[],
+  seenIds: Set<number> = new Set()
+): Category[] {
   return categories
     .filter((category) => {
       if (seenIds.has(category.categoryId)) {
@@ -34,7 +41,7 @@ function removeDuplicateCategories(categories: any[], seenIds = new Set()) {
         return true;
       }
     })
-    .map((category: any) => ({
+    .map((category: Category) => ({
       ...category,
       subCategories: removeDuplicateCategories(category.subCategories, seenIds),
     }));
@@ -52,6 +59,7 @@ const ProductFinderFilters: React.FC = () => {
     searchText,
     sortOption,
     isCategoriesLoaded,
+    lastLoadedAt,
     setCategories,
     setSubCategories,
     setThirdLevelCategories,
@@ -63,11 +71,16 @@ const ProductFinderFilters: React.FC = () => {
     setSearchText,
     setSortOption,
     setIsCategoriesLoaded,
+    setLastLoadedAt,
   } = useProductFinderFilterStore();
 
-  // Fetch and clean categories on mount
   useEffect(() => {
-    const fetchCategories = async () => {
+    // Si ya cargamos datos anteriormente (lastLoadedAt !== null), no cargamos de nuevo
+    if (lastLoadedAt !== null) {
+      return;
+    }
+
+    const fetchData = async () => {
       setIsCategoriesLoaded(false);
       const productGroups = await getProductFinderCategories();
       const sortedCategories = productGroups.sort((a: any, b: any) =>
@@ -89,7 +102,7 @@ const ProductFinderFilters: React.FC = () => {
       setCategories(cleanedCategories);
       setIsCategoriesLoaded(true);
 
-      // If no category selected, set a default one
+      // Set a default category if none is selected
       if (!categoryId) {
         const defaultCategory = cleanedCategories.find(
           (cat: any) => cat.category === "Toys & Games"
@@ -106,16 +119,17 @@ const ProductFinderFilters: React.FC = () => {
         );
         setSubCategories(currentCategory?.subCategories || []);
       }
-    };
 
-    const fetchPriceRangeData = async () => {
+      // Fetch price range
       const pr = await getProductFinderPriceRange();
       setPriceRange([pr.min, pr.max]);
       setPriceRangeSelected([pr.min, pr.max]);
+
+      // Set lastLoadedAt to current time
+      setLastLoadedAt(Date.now());
     };
 
-    fetchCategories();
-    fetchPriceRangeData();
+    fetchData();
   }, [
     categoryId,
     setCategories,
@@ -126,12 +140,13 @@ const ProductFinderFilters: React.FC = () => {
     setCategoryId,
     setSubCategoryId,
     setThirdLevelCategoryId,
+    lastLoadedAt,
+    setLastLoadedAt,
   ]);
 
   // Update subCategories when categoryId changes
   useEffect(() => {
     if (!categories.length) return;
-
     const currentCategory = categories.find(
       (cat: any) => cat.categoryId === categoryId
     );
@@ -237,7 +252,7 @@ const ProductFinderFilters: React.FC = () => {
             <>
               <Grid container spacing={2} alignItems="center">
                 {/* Search Field */}
-                <Grid item xs={12} md={2}>
+                <Grid xs={12} md={2}>
                   <TextField
                     fullWidth
                     label="Search"
@@ -250,7 +265,7 @@ const ProductFinderFilters: React.FC = () => {
                 </Grid>
 
                 {/* Category Filter */}
-                <Grid item xs={12} md={3}>
+                <Grid xs={12} md={3}>
                   <FormControl
                     fullWidth
                     variant="outlined"
@@ -279,7 +294,7 @@ const ProductFinderFilters: React.FC = () => {
                 </Grid>
 
                 {/* Subcategory Filter */}
-                <Grid item xs={12} md={3}>
+                <Grid xs={12} md={3}>
                   <FormControl
                     fullWidth
                     variant="outlined"
@@ -308,7 +323,7 @@ const ProductFinderFilters: React.FC = () => {
                 </Grid>
 
                 {/* Price Range Slider */}
-                <Grid item xs={12} md={2}>
+                <Grid xs={12} md={2}>
                   <Typography
                     id="price-range-slider"
                     variant="body2"
@@ -327,13 +342,12 @@ const ProductFinderFilters: React.FC = () => {
                 </Grid>
 
                 {/* Search Button */}
-                <Grid item xs={12} md={2}>
+                <Grid xs={12} md={2}>
                   <Button
                     fullWidth
                     variant="contained"
                     color="primary"
                     sx={{ height: "46px" }}
-                    // onClick={handleSearch}
                   >
                     Search
                   </Button>
@@ -348,7 +362,7 @@ const ProductFinderFilters: React.FC = () => {
                 mt={2}
               >
                 {/* Sort Filter */}
-                <Grid item xs={12} md={2}>
+                <Grid xs={12} md={2}>
                   <FormControl
                     fullWidth
                     variant="outlined"
