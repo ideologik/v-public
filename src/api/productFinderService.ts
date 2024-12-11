@@ -79,11 +79,13 @@ export const getProductFinderCategories = async (
     const data = await axiosClient.get<Category[]>(
       `/ProductFinder/Categories?include_child=${includeChild}`
     );
-    return data;
+    return data.filter((category) => category.categoryId !== 0);
   } catch (error: unknown) {
     console.error("Error fetching categories:", error);
     if (error instanceof Error) {
-      throw new Error(`Error fetching categories: ${error.message}`); // Definir la interfaz Category en tu archivo productFinder.d.ts
+      throw new Error(`Error fetching categories: ${error.message}`);
+    } else {
+      throw new Error("Error fetching categories: Unknown error");
     }
   }
 };

@@ -1,6 +1,6 @@
 // src/components/layout/FilterMenu/FilterMenu.tsx
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Card } from "@mui/material";
 import Slide from "@mui/material/Slide";
 import ProductFinderFilters from "./ProductFinderFilters";
 import MyProductsFilters from "./MyProductsFilters";
@@ -15,24 +15,28 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
 }) => {
   const { filtersOpen } = useFilterStore();
   return (
-    <Slide direction="left" in={filtersOpen} mountOnEnter unmountOnExit>
-      <Box
-        sx={{
-          width: 250,
-          backgroundColor: "#ffffff",
-          borderLeft: "1px solid #ccc",
-          height: "100%",
-          padding: 2,
-        }}
-      >
-        <Typography variant="h6" gutterBottom>
-          Filters
-        </Typography>
-
-        {filterType === "productFinder" && <ProductFinderFilters />}
-        {filterType === "myProducts" && <MyProductsFilters />}
-      </Box>
-    </Slide>
+    <>
+      <Slide direction="left" in={filtersOpen} mountOnEnter unmountOnExit>
+        <Box
+          sx={{
+            width: 250,
+            backgroundColor: "transparent", // Dejar transparente para que se vea el fondo #DDDDDD del layout
+            height: "100%",
+            p: 1,
+          }}
+        >
+          <Card
+            sx={{
+              borderRadius: 2, // Bordes redondeados
+              p: 2, // Padding interno para los contenidos del filtro
+            }}
+          >
+            {filterType === "productFinder" && <ProductFinderFilters />}
+            {filterType === "myProducts" && <MyProductsFilters />}
+          </Card>
+        </Box>
+      </Slide>
+    </>
   );
 };
 

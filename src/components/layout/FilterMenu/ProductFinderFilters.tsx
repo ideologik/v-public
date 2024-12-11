@@ -1,8 +1,7 @@
 // src/components/layout/FilterMenu/ProductFinderFilters.tsx
+
 import React, { useEffect } from "react";
 import {
-  Card,
-  CardContent,
   Typography,
   FormControl,
   InputLabel,
@@ -13,6 +12,10 @@ import {
   Button,
   Box,
   Slider,
+  Divider,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import {
@@ -24,7 +27,7 @@ import { useProductFinderFilterStore } from "../../../store/productFinderFilterS
 
 interface Category {
   categoryId: number;
-  category: string; // Ajusta según tus datos
+  category: string;
   subCategories: Category[];
 }
 
@@ -41,7 +44,7 @@ function removeDuplicateCategories(
         return true;
       }
     })
-    .map((category: Category) => ({
+    .map((category) => ({
       ...category,
       subCategories: removeDuplicateCategories(category.subCategories, seenIds),
     }));
@@ -75,25 +78,22 @@ const ProductFinderFilters: React.FC = () => {
   } = useProductFinderFilterStore();
 
   useEffect(() => {
-    // Si ya cargamos datos anteriormente (lastLoadedAt !== null), no cargamos de nuevo
-    if (lastLoadedAt !== null) {
-      return;
-    }
+    if (lastLoadedAt !== null) return;
 
     const fetchData = async () => {
       setIsCategoriesLoaded(false);
       const productGroups = await getProductFinderCategories();
-      const sortedCategories = productGroups.sort((a: any, b: any) =>
+      const sortedCategories = productGroups.sort((a, b) =>
         a.category.localeCompare(b.category)
       );
 
-      sortedCategories.forEach((cat: any) => {
+      sortedCategories.forEach((cat) => {
         cat.subCategories = cat.subCategories.filter(
-          (sub: any) => sub.category !== ""
+          (sub) => sub.category !== ""
         );
-        cat.subCategories.forEach((sub: any) => {
+        cat.subCategories.forEach((sub) => {
           sub.subCategories = sub.subCategories.filter(
-            (sub2: any) => sub2.category !== ""
+            (sub2) => sub2.category !== ""
           );
         });
       });
@@ -105,7 +105,7 @@ const ProductFinderFilters: React.FC = () => {
       // Set a default category if none is selected
       if (!categoryId) {
         const defaultCategory = cleanedCategories.find(
-          (cat: any) => cat.category === "Toys & Games"
+          (cat) => cat.category === "Toys & Games"
         );
         if (defaultCategory) {
           setCategoryId(defaultCategory.categoryId);
@@ -115,7 +115,7 @@ const ProductFinderFilters: React.FC = () => {
         }
       } else {
         const currentCategory = cleanedCategories.find(
-          (cat: any) => cat.categoryId === categoryId
+          (cat) => cat.categoryId === categoryId
         );
         setSubCategories(currentCategory?.subCategories || []);
       }
@@ -125,7 +125,6 @@ const ProductFinderFilters: React.FC = () => {
       setPriceRange([pr.min, pr.max]);
       setPriceRangeSelected([pr.min, pr.max]);
 
-      // Set lastLoadedAt to current time
       setLastLoadedAt(Date.now());
     };
 
@@ -144,11 +143,10 @@ const ProductFinderFilters: React.FC = () => {
     setLastLoadedAt,
   ]);
 
-  // Update subCategories when categoryId changes
   useEffect(() => {
     if (!categories.length) return;
     const currentCategory = categories.find(
-      (cat: any) => cat.categoryId === categoryId
+      (cat) => cat.categoryId === categoryId
     );
     setSubCategories(currentCategory?.subCategories || []);
 
@@ -170,7 +168,6 @@ const ProductFinderFilters: React.FC = () => {
     setThirdLevelCategories,
   ]);
 
-  // Update thirdLevelCategories when subCategoryId changes
   useEffect(() => {
     const fetchThirdLevelCategories = async (id: number) => {
       const tlCategories = await getProductFinderSubCategories(id);
@@ -179,7 +176,7 @@ const ProductFinderFilters: React.FC = () => {
 
     if (!subCategories.length) return;
     const currentSubCategory = subCategories.find(
-      (sub: any) => sub.categoryId === subCategoryId
+      (sub) => sub.categoryId === subCategoryId
     );
 
     if (currentSubCategory) {
@@ -207,6 +204,7 @@ const ProductFinderFilters: React.FC = () => {
     level: "category" | "subCategory" | "thirdLevelCategory",
     value: any
   ) => {
+    console.log(value);
     if (level === "category") {
       setCategoryId(value || null);
       setSubCategoryId(null);
@@ -221,7 +219,7 @@ const ProductFinderFilters: React.FC = () => {
     }
   };
 
-  const handlePriceChange = (event: any, newValue: number[]) => {
+  const handlePriceChange = (_: any, newValue: number[]) => {
     setPriceRangeSelected([newValue[0], newValue[1]]);
   };
 
@@ -231,164 +229,124 @@ const ProductFinderFilters: React.FC = () => {
     setSearchText(event.target.value);
   };
 
-  const handleSortChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSortOption(event.target.value as string);
+  const handleSortOptionChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSortOption(event.target.value);
   };
 
   return (
-    <Box sx={{ padding: 2 }}>
-      <Card>
-        <CardContent>
-          {!isCategoriesLoaded ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height="46px"
+    <>
+      {!isCategoriesLoaded ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="46px"
+        >
+          <CircularProgress size={30} />
+        </Box>
+      ) : (
+        <Box>
+          {/* Search Field */}
+          <Typography variant="h6" gutterBottom>
+            Filter
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <TextField
+            fullWidth
+            label="Search"
+            variant="outlined"
+            value={searchText}
+            onChange={handleSearchTextChange}
+            sx={{ mb: 2 }}
+          />
+          <Typography variant="body1" gutterBottom>
+            Category
+          </Typography>
+          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+            <InputLabel>Show</InputLabel>
+            <Select
+              label="Show"
+              value={categoryId || ""}
+              onChange={(e) => handleCategoryChange("category", e.target.value)}
             >
-              <CircularProgress size={30} />
-            </Box>
-          ) : (
-            <>
-              <Grid container spacing={2} alignItems="center">
-                {/* Search Field */}
-                <Grid xs={12} md={2}>
-                  <TextField
-                    fullWidth
-                    label="Search"
-                    variant="outlined"
-                    sx={{ height: "46px" }}
-                    InputProps={{ style: { height: "46px" } }}
-                    value={searchText}
-                    onChange={handleSearchTextChange}
-                  />
-                </Grid>
-
-                {/* Category Filter */}
-                <Grid xs={12} md={3}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{ height: "46px" }}
-                  >
-                    <InputLabel>Category</InputLabel>
-                    <Select
-                      label="Category"
-                      value={categoryId || ""}
-                      onChange={(e) =>
-                        handleCategoryChange("category", e.target.value)
-                      }
-                      sx={{ height: "46px" }}
-                    >
-                      <MenuItem value="">All Categories</MenuItem>
-                      {categories.map((category: any) => (
-                        <MenuItem
-                          key={category.categoryId}
-                          value={category.categoryId}
-                        >
-                          {category.category}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Subcategory Filter */}
-                <Grid xs={12} md={3}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{ height: "46px" }}
-                  >
-                    <InputLabel>Subcategory</InputLabel>
-                    <Select
-                      label="Subcategory"
-                      value={subCategoryId || "all"}
-                      onChange={(e) =>
-                        handleCategoryChange("subCategory", e.target.value)
-                      }
-                      sx={{ height: "46px" }}
-                    >
-                      <MenuItem value="all">All Subcategories</MenuItem>
-                      {subCategories.map((subCategory: any) => (
-                        <MenuItem
-                          key={subCategory.categoryId}
-                          value={subCategory.categoryId}
-                        >
-                          {subCategory.category}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                {/* Price Range Slider */}
-                <Grid xs={12} md={2}>
-                  <Typography
-                    id="price-range-slider"
-                    variant="body2"
-                    color="textSecondary"
-                  >
-                    Price Range: ${priceRangeSelected[0].toFixed(2)} - $
-                    {priceRangeSelected[1].toFixed(2)}
-                  </Typography>
-                  <Slider
-                    value={priceRangeSelected}
-                    onChange={handlePriceChange}
-                    valueLabelDisplay="auto"
-                    min={priceRange[0]}
-                    max={priceRange[1]}
-                  />
-                </Grid>
-
-                {/* Search Button */}
-                <Grid xs={12} md={2}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    sx={{ height: "46px" }}
-                  >
-                    Search
-                  </Button>
-                </Grid>
-              </Grid>
-
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                justifyContent="flex-end"
-                mt={2}
-              >
-                {/* Sort Filter */}
-                <Grid xs={12} md={2}>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{ height: "36px" }}
-                  >
-                    <InputLabel>Sort by</InputLabel>
-                    <Select
-                      label="Sort by"
-                      value={sortOption}
-                      onChange={handleSortChange}
-                      sx={{ height: "36px" }}
-                    >
-                      <MenuItem value="0">Relevance</MenuItem>
-                      <MenuItem value="1">Best Selling</MenuItem>
-                      <MenuItem value="2">Price: Low to High</MenuItem>
-                      <MenuItem value="3">Price: High to Low</MenuItem>
-                      <MenuItem value="4">Rating: High to Low</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </Box>
+              <MenuItem value="all">All Categories</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.categoryId} value={category.categoryId}>
+                  {category.category}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Typography variant="body1" gutterBottom>
+            Subcategory
+          </Typography>
+          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+            <InputLabel>Show</InputLabel>
+            <Select
+              label="Show"
+              value={subCategoryId || "all"}
+              onChange={(e) =>
+                handleCategoryChange("subCategory", e.target.value)
+              }
+            >
+              <MenuItem value="all">All Sub-Categories</MenuItem>
+              {subCategories.map((subCategory) => (
+                <MenuItem
+                  key={subCategory.categoryId}
+                  value={subCategory.categoryId}
+                >
+                  {subCategory.category}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Typography variant="body1" gutterBottom>
+            Price Range
+          </Typography>
+          <Typography variant="body2" gutterBottom sx={{ fontSize: "0.8rem" }}>
+            ${priceRangeSelected[0].toFixed(2)} - $
+            {priceRangeSelected[1].toFixed(2)}
+          </Typography>
+          <Slider
+            sx={{ mb: 2 }}
+            value={priceRangeSelected}
+            onChange={handlePriceChange}
+            valueLabelDisplay="auto"
+            min={priceRange[0]}
+            max={priceRange[1]}
+          />
+          <Typography variant="body1" gutterBottom>
+            Sort
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <RadioGroup value={sortOption} onChange={handleSortOptionChange}>
+            <FormControlLabel value="0" control={<Radio />} label="Relevance" />
+            <FormControlLabel
+              value="1"
+              control={<Radio />}
+              label="Sold Last Month"
+            />
+            <FormControlLabel
+              value="2"
+              control={<Radio />}
+              label="Price Low to High"
+            />
+            <FormControlLabel
+              value="3"
+              control={<Radio />}
+              label="Price High to Low"
+            />
+            <FormControlLabel
+              value="4"
+              control={<Radio />}
+              label="Competition High to Low"
+            />
+          </RadioGroup>
+        </Box>
+      )}
+    </>
   );
 };
 
