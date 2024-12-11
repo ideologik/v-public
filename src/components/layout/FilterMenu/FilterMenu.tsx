@@ -22,7 +22,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       }}
     >
       <Typography variant="h6" gutterBottom>
-        Filtros
+        Filters
       </Typography>
 
       {filterType === "productFinder" && <ProductFinderFilters />}

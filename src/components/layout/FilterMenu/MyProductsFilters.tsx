@@ -5,7 +5,7 @@ const MyProductsFilters: React.FC = () => {
   return (
     <div>
       {/* Aquí van los filtros específicos para My Products */}
-      <p>Filtros de My Products</p>
+      <p>Filters My Products</p>
       {/* Ejemplo: estado del producto, tags, ordenamiento, etc. */}
     </div>
   );
