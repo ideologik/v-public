@@ -1,6 +1,6 @@
 // src/components/layout/FilterMenu/FilterMenu.tsx
 import React from "react";
-import { Box, Typography, Card } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import Slide from "@mui/material/Slide";
 import ProductFinderFilters from "./ProductFinderFilters";
 import MyProductsFilters from "./MyProductsFilters";

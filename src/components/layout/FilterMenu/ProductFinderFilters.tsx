@@ -15,7 +15,6 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  RadioProps,
 } from "@mui/material";
 
 import {
@@ -237,8 +236,15 @@ const ProductFinderFilters: React.FC = () => {
     }
   };
 
-  const handlePriceChange = (_: any, newValue: number[]) => {
-    setPriceRangeSelected([newValue[0], newValue[1]]);
+  const handlePriceChange = (
+    event: Event,
+    value: number | number[],
+    activeThumb: number
+  ) => {
+    console.log(event, value, activeThumb);
+    if (Array.isArray(value)) {
+      setPriceRangeSelected([value[0], value[1]]);
+    }
   };
 
   const handleSearchTextChange = (
