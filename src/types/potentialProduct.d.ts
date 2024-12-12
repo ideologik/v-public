@@ -75,3 +75,90 @@ export interface CJDropshippingProduct extends UnifiedProduct {
   listedNum?: number;
   createAt?: number; // timestamp
 }
+
+// Raw product from AliExpress API
+export interface AliExpressRawProduct {
+  original_price: string;
+  product_small_image_urls: {
+    _string: string | null;
+  };
+  second_level_category_name: string;
+  product_detail_url: string;
+  target_sale_price: string;
+  second_level_category_id: string;
+  discount: string;
+  product_main_image_url: string;
+  first_level_category_id: string;
+  target_sale_price_currency: string;
+  original_price_currency: string;
+  shop_url: string;
+  target_original_price_currency: string;
+  product_id: string;
+  seller_id: number;
+  target_original_price: string;
+  product_video_url: string;
+  first_level_category_name: string;
+  sale_price: string;
+  product_title: string;
+  shop_id: number;
+  sale_price_currency: string;
+  lastest_volume: string;
+  evaluate_rate: string | null;
+}
+
+export interface AliExpressFindByImageResponse {
+  aliexpress_ds_image_search_response: {
+    data: {
+      total_record_count: number;
+      products: {
+        traffic_image_product_d_t_o: AliExpressRawProduct[];
+      };
+    };
+    rsp_code: string;
+    rsp_msg: string;
+    request_id: string;
+  };
+}
+
+// Raw product from CJDropshipping API
+export interface CJRawProduct {
+  id: string;
+  bigImage: string;
+  category: string;
+  categoryId: string;
+  description: string;
+  image: string; // JSON string con array de URLs
+  inventory: any;
+  material: string; // JSON string array ej. ["塑料","其他"]
+  materialEn: string; // JSON string array ej. ["Plastic","Others"]
+  materialKey: string; // JSON string array ej. ["PLASTIC","MATERIAL"]
+  name: string; // JSON string array con varios nombres
+  nameEn: string;
+  packWeight: string;
+  packing: string; // JSON string array ej. ["塑料袋"]
+  packingEn: string; // JSON string array
+  packingKey: string; // JSON string array
+  property: string; // JSON string array ej. ["电子"]
+  propertyEn: string; // JSON string array
+  propertyKey: string; // JSON string array
+  saleStatus: string;
+  sellPrice: string; // Ej. "25.84-34.5"
+  sku: string;
+  unit: string | null;
+  variantKey: string; // JSON string array ej. ["颜色"]
+  variantKeyEn: string; // JSON string array ej. ["Color"]
+  weight: string;
+  addMarkStatus: number;
+  productType: string;
+  listedNum: number;
+  createAt: number;
+}
+
+export interface CJSearchByImageResponse {
+  code: number;
+  result: boolean;
+  message: string;
+  data: CJRawProduct[];
+  requestId: string;
+  success: boolean;
+}

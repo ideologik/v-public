@@ -1,5 +1,10 @@
 // src/api/aliexpressService.ts
 import axiosClient from "./axiosClient";
+import { mapAliExpressProductToUnified } from "../mappers/potentialProductMapper";
+import {
+  AliExpressFindByImageResponse,
+  AliExpressRawProduct,
+} from "../types/potentialProduct";
 
 // AliExpress en ProductFinder
 // POST /io/ProductFinder/AliExpressFindByText
@@ -17,19 +22,23 @@ export const aliExpressFindByText = async (searchText: string) => {
 // POST /io/ProductFinder/AliExpressFindByImage
 export const aliExpressFindByImage = async (imageUrl: string) => {
   try {
-    // Ajustar según si la API requiere body o query param
-    return await axiosClient.post(
+    const response = await axiosClient.post<AliExpressFindByImageResponse>(
       `/ProductFinder/AliExpressFindByImage?image_url=${encodeURIComponent(
         imageUrl
       )}`
     );
+    const rawProducts: AliExpressRawProduct[] =
+      response.aliexpress_ds_image_search_response.data.products
+        .traffic_image_product_d_t_o;
+    const mappedProducts = rawProducts.map(mapAliExpressProductToUnified);
+    return mappedProducts;
   } catch (error) {
     console.error("Error finding by image:", error);
     throw error;
   }
 };
 
-// GET /io/ProductFinder/AliExpressGetProductByID
+// GET /io / ProductFinder / AliExpressGetProductByID;
 export const aliExpressGetProductByID = async (productId: string | number) => {
   try {
     return await axiosClient.get("ProductFinder/AliExpressGetProductByID", {
