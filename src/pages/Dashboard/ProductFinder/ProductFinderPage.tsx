@@ -1,15 +1,5 @@
-// src/pages/Dashboard/ProductFinder/ProductFinderPage.tsx
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Typography, CircularProgress } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useProductFinderFilterStore } from "../../../store/productFinderFilterStore";
 import { getProductsFinder } from "../../../api/productFinderService";
@@ -17,6 +7,7 @@ import {
   BestsellerProduct,
   ProductFinderParams,
 } from "../../../types/productFinder";
+import { ProductCard } from "./ProductCard"; // Importamos el nuevo componente
 
 export const ProductFinderPage: React.FC = () => {
   const [products, setProducts] = useState<BestsellerProduct[]>([]);
@@ -77,18 +68,15 @@ export const ProductFinderPage: React.FC = () => {
 
   // Debounce para filtros: Esperar un tiempo antes de llamar a loadProducts cuando cambien los filtros
   useEffect(() => {
-    // Reiniciamos la página y productos cuando cambian filtros
     setPage(0);
     setProducts([]);
 
-    // Establecemos un timeout para evitar llamadas repetidas
     const debounceTimer = setTimeout(() => {
       if (isCategoriesLoaded) {
         loadProducts(0, false);
       }
-    }, 500); // 500ms de espera, ajusta según necesites
+    }, 500);
 
-    // Limpiar el timeout si cambian los filtros antes de que se cumpla el tiempo
     return () => clearTimeout(debounceTimer);
   }, [
     searchText,
@@ -115,7 +103,6 @@ export const ProductFinderPage: React.FC = () => {
       if (observerRef.current) observerRef.current.disconnect();
       observerRef.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting) {
-          // Cuando el último producto es visible, incrementa la página para cargar más
           setPage((prevPage) => prevPage + 1);
         }
       });
@@ -125,104 +112,28 @@ export const ProductFinderPage: React.FC = () => {
   );
 
   return (
-    <Box p={2}>
+    <>
       {products.length === 0 && !loading ? (
         <Typography variant="body1">No products found</Typography>
       ) : (
-        <Grid container spacing={3} p={2}>
+        <Grid container spacing={1} p={1}>
           {products.map((product, index) => {
-            const name = product.bes_title || "No Name";
-            const price =
-              product.bes_price !== null ? product.bes_price.toFixed(2) : "N/A";
-            const brand = product.bes_brand || "N/A";
-            const soldLastMonth =
-              product.bes_boughtInPastMonth !== null
-                ? product.bes_boughtInPastMonth + "+"
-                : "N/A";
-
-            let imageURL = "/assets/imgs/default-product-image.png";
-            if (product.bes_imageURLs) {
-              const imageArray = product.bes_imageURLs
-                .split(",")
-                .map((url) => url.trim());
-              if (imageArray.length > 0) {
-                imageURL = imageArray[0];
-              }
-            }
-
-            // Si es el último producto, agregamos el ref para el infinite scroll
             const isLastProduct = index === products.length - 1;
 
             return (
               <Grid
                 container
-                size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+                size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
                 key={product.bes_id || index}
-                ref={isLastProduct ? lastProductRef : null}
               >
-                <Card
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={imageURL}
-                    alt={name}
-                    sx={{ height: 200, objectFit: "contain" }}
-                  />
-                  <CardContent
-                    sx={{ flex: 1, display: "flex", flexDirection: "column" }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        mb: 1,
-                      }}
-                    >
-                      {name}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Brand: {brand}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Price: ${price}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Sold last month: {soldLastMonth}
-                    </Typography>
-
-                    <Box mt={2} display="flex" flexDirection="column" gap={1}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        disabled
-                      >
-                        Find potential products
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        fullWidth
-                        disabled
-                      >
-                        Publish to Store
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
+                <ProductCard
+                  product={product}
+                  refProp={isLastProduct ? lastProductRef : undefined}
+                />
               </Grid>
             );
           })}
 
-          {/* Mostrar el CircularProgress si se está cargando */}
           {loading && (
             <Grid display="flex" justifyContent="center" alignItems="center">
               <CircularProgress size={30} />
@@ -230,6 +141,6 @@ export const ProductFinderPage: React.FC = () => {
           )}
         </Grid>
       )}
-    </Box>
+    </>
   );
 };
