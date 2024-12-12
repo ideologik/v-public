@@ -75,13 +75,21 @@ export const ProductFinderPage: React.FC = () => {
     ]
   );
 
-  // Cargar productos cuando cambian los filtros (reiniciar lista y página)
+  // Debounce para filtros: Esperar un tiempo antes de llamar a loadProducts cuando cambien los filtros
   useEffect(() => {
+    // Reiniciamos la página y productos cuando cambian filtros
     setPage(0);
     setProducts([]);
-    if (isCategoriesLoaded) {
-      loadProducts(0, false);
-    }
+
+    // Establecemos un timeout para evitar llamadas repetidas
+    const debounceTimer = setTimeout(() => {
+      if (isCategoriesLoaded) {
+        loadProducts(0, false);
+      }
+    }, 500); // 500ms de espera, ajusta según necesites
+
+    // Limpiar el timeout si cambian los filtros antes de que se cumpla el tiempo
+    return () => clearTimeout(debounceTimer);
   }, [
     searchText,
     categoryId,
