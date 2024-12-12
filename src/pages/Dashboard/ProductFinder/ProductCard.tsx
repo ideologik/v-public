@@ -1,14 +1,7 @@
 // src/components/ProductCard.tsx
 import React from "react";
 import Slider from "react-slick";
-import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
-  Button,
-  Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import {
   ArrowUpward,
   ArrowDownward,
@@ -16,10 +9,23 @@ import {
 } from "@mui/icons-material";
 import { BestsellerProduct } from "../../../types/productFinder";
 
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "./product-card.css";
+
 interface ProductCardProps {
   product: BestsellerProduct;
-  refProp?: (node: HTMLDivElement | null) => void; // Por si necesitas la referencia para el infinite scroll
+  refProp?: (node: HTMLDivElement | null) => void;
 }
+
+// Función para obtener el arreglo de imágenes
+const getImagesArray = (imageURLs: string | null): string[] => {
+  if (!imageURLs) return ["/assets/images/default-product-image.png"];
+  return imageURLs
+    .split(",")
+    .map((url) => url.trim())
+    .filter((url) => url !== "");
+};
 
 const getTrendIcon = (current: number, average: number) => {
   if (current > average) return <ArrowUpward style={{ color: "green" }} />;
@@ -31,6 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   refProp,
 }) => {
+  const SlickSlider = Slider as unknown as React.ComponentType<any>;
   const name = product.bes_title || "No Name";
   const category = product.bes_productGroup || "N/A";
   const subcategory = product.bes_productSubGroup || "N/A";
@@ -42,15 +49,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       ? product.bes_boughtInPastMonth + "+"
       : "N/A";
 
-  let imageURL = "/assets/images/default-product-image.png";
-  if (product.bes_imageURLs) {
-    const imageArray = product.bes_imageURLs
-      .split(",")
-      .map((url) => url.trim());
-    if (imageArray.length > 0) {
-      imageURL = imageArray[0];
-    }
-  }
+  const images = getImagesArray(product.bes_imageURLs);
+  const isSingleImage = images.length === 1;
+
+  // Ajustes del slider
+  const sliderSettings = {
+    dots: false,
+    infinite: !isSingleImage,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    arrows: !isSingleImage, // Si hay una sola imagen, no mostrar flechas
+    adaptiveHeight: true,
+  };
 
   return (
     <Card
@@ -62,12 +72,49 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         justifyContent: "space-between",
       }}
     >
-      <CardMedia
-        component="img"
-        image={imageURL}
-        alt={name}
-        sx={{ height: 200, objectFit: "contain" }}
-      />
+      {/* Contenedor para el slider */}
+      <Box
+        sx={{
+          height: "30vh",
+          overflow: "hidden",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <SlickSlider
+          {...sliderSettings}
+          style={{
+            width: "100%",
+            height: "100%",
+            cursor: "grab",
+          }}
+        >
+          {images.map((img, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "90%",
+              }}
+            >
+              <img
+                src={img}
+                alt={`${name} - ${idx}`}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            </Box>
+          ))}
+        </SlickSlider>
+      </Box>
+
       <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Typography
           variant="h6"
@@ -117,10 +164,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           Brand: {brand}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Curent Price: ${price}
+          Current Price: ${price}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Sales Rank: {product.bes_salesrank || "N/A"}{" "}
+          Sales Rank: {product.bes_salesrank ?? "N/A"}{" "}
           <Box component="span" sx={{ verticalAlign: "middle" }}>
             {getTrendIcon(
               product.bes_salesrank ?? 0,
