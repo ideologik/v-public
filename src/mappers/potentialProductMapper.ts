@@ -5,7 +5,7 @@ import {
   CJDropshippingProduct,
 } from "../types/potentialProduct";
 
-import defaultImage from "../assets/imgs/default-product-image.png";
+import defaultImage from "../assets/images/default-product-image.png";
 
 // Mapper para AliExpress
 // Recibe un objeto crudo de AliExpress

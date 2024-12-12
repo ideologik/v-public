@@ -8,7 +8,9 @@ const MainLayout = () => {
   const location = useLocation();
 
   let filterType = "productFinder";
-  if (location.pathname.startsWith("/my-products")) {
+  if (location.pathname.startsWith("/product-finder/results")) {
+    filterType = "potentialProducts";
+  } else if (location.pathname.startsWith("/my-products")) {
     filterType = "myProducts";
   }
 

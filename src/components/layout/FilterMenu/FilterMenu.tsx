@@ -5,6 +5,7 @@ import Slide from "@mui/material/Slide";
 import ProductFinderFilters from "./ProductFinderFilters";
 import MyProductsFilters from "./MyProductsFilters";
 import { useFilterStore } from "../../../store/filterStore";
+import PotentialProductsFilters from "./PotentialProductsFilters";
 
 interface FilterMenuProps {
   filterType?: string;
@@ -33,6 +34,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           >
             {filterType === "productFinder" && <ProductFinderFilters />}
             {filterType === "myProducts" && <MyProductsFilters />}
+            {filterType === "potentialProducts" && <PotentialProductsFilters />}
           </Card>
         </Box>
       </Slide>

@@ -1,5 +1,5 @@
-// src/components/ProductCard.tsx
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import {
@@ -8,17 +8,16 @@ import {
   HorizontalRule,
 } from "@mui/icons-material";
 import { BestsellerProduct } from "../../../types/productFinder";
+import { usePotentialProductsFilterStore } from "../../../store/potentialProductsFilterStore";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import "./product-card.css";
 
 interface ProductCardProps {
   product: BestsellerProduct;
   refProp?: (node: HTMLDivElement | null) => void;
 }
 
-// Función para obtener el arreglo de imágenes
 const getImagesArray = (imageURLs: string | null): string[] => {
   if (!imageURLs) return ["/assets/images/default-product-image.png"];
   return imageURLs
@@ -38,6 +37,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   refProp,
 }) => {
   const SlickSlider = Slider as unknown as React.ComponentType<any>;
+  const navigate = useNavigate();
+
+  const { setSelectedProduct, setSourcingPlatform, setSelectedProductImage } =
+    usePotentialProductsFilterStore();
+
   const name = product.bes_title || "No Name";
   const category = product.bes_productGroup || "N/A";
   const subcategory = product.bes_productSubGroup || "N/A";
@@ -51,15 +55,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const images = getImagesArray(product.bes_imageURLs);
   const isSingleImage = images.length === 1;
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Ajustes del slider
   const sliderSettings = {
     dots: false,
     infinite: !isSingleImage,
     slidesToShow: 1,
     slidesToScroll: 1,
-    arrows: !isSingleImage, // Si hay una sola imagen, no mostrar flechas
+    arrows: !isSingleImage,
     adaptiveHeight: true,
+    afterChange: (current: number) => {
+      setCurrentImageIndex(current);
+    },
+  };
+
+  const handleFindPotentialProducts = () => {
+    setSelectedProduct(product);
+    setSourcingPlatform("aliexpress");
+    const currentImageUrl = images[currentImageIndex] || null;
+    setSelectedProductImage(currentImageUrl);
+    navigate("/product-finder/results");
   };
 
   return (
@@ -72,7 +87,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         justifyContent: "space-between",
       }}
     >
-      {/* Contenedor para el slider */}
       <Box
         sx={{
           height: "30vh",
@@ -198,7 +212,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Typography>
 
         <Box mt={2} display="flex" flexDirection="column" gap={1}>
-          <Button variant="contained" color="primary" fullWidth>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handleFindPotentialProducts}
+          >
             Find potential products
           </Button>
           <Button variant="contained" color="primary" fullWidth>
