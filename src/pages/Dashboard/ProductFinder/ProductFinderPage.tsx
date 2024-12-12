@@ -1,6 +1,6 @@
 // src/pages/Dashboard/ProductFinder/ProductFinderPage.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -8,17 +8,21 @@ import {
   CardContent,
   CardMedia,
   Button,
-  Grid,
+  CircularProgress,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useProductFinderFilterStore } from "../../../store/productFinderFilterStore";
 import { getProductsFinder } from "../../../api/productFinderService";
 import {
   BestsellerProduct,
   ProductFinderParams,
-} from "../../../types/productFinder"; // Asegúrate de importar los tipos correctos
+} from "../../../types/productFinder";
 
 export const ProductFinderPage: React.FC = () => {
   const [products, setProducts] = useState<BestsellerProduct[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const {
     searchText,
@@ -30,8 +34,9 @@ export const ProductFinderPage: React.FC = () => {
     isCategoriesLoaded,
   } = useProductFinderFilterStore();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
+  const loadProducts = useCallback(
+    async (currentPage: number, append = false) => {
+      console.log("entro a loadProducts");
       if (!isCategoriesLoaded) return;
 
       const params: ProductFinderParams = {
@@ -41,19 +46,42 @@ export const ProductFinderPage: React.FC = () => {
         AmazonThirdCategoryId: thirdLevelCategoryId || undefined,
         priceFrom: priceRangeSelected[0],
         priceTo: priceRangeSelected[1],
-        sort_by: parseInt(sortOption),
+        sort_by: Number(sortOption),
+        page: currentPage,
+        total_rows: 10,
       };
 
+      setLoading(true);
       try {
-        // getProductsFinder retorna BestsellerProducts { total_records, data: [...] }
         const data = await getProductsFinder(params);
-        setProducts(data.data);
+        const newProducts = data.data || [];
+        setProducts((prev) =>
+          append ? [...prev, ...newProducts] : newProducts
+        );
       } catch (error) {
         console.error("Error fetching products:", error);
-        setProducts([]);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchProducts();
+    },
+    [
+      isCategoriesLoaded,
+      searchText,
+      categoryId,
+      subCategoryId,
+      thirdLevelCategoryId,
+      priceRangeSelected,
+      sortOption,
+    ]
+  );
+
+  // Cargar productos cuando cambian los filtros (reiniciar lista y página)
+  useEffect(() => {
+    setPage(0);
+    setProducts([]);
+    if (isCategoriesLoaded) {
+      loadProducts(0, false);
+    }
   }, [
     searchText,
     categoryId,
@@ -62,14 +90,38 @@ export const ProductFinderPage: React.FC = () => {
     priceRangeSelected,
     sortOption,
     isCategoriesLoaded,
+    loadProducts,
   ]);
+
+  // Cuando la página cambia (scroll infinito), cargar más productos
+  useEffect(() => {
+    if (page > 0) {
+      loadProducts(page, true);
+    }
+  }, [page, loadProducts]);
+
+  // Callback para el IntersectionObserver
+  const lastProductRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
+      if (observerRef.current) observerRef.current.disconnect();
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          // Cuando el último producto es visible, incrementa la página para cargar más
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+      if (node) observerRef.current.observe(node);
+    },
+    [loading]
+  );
 
   return (
     <Box p={2}>
-      {products.length === 0 ? (
+      {products.length === 0 && !loading ? (
         <Typography variant="body1">No products found</Typography>
       ) : (
-        <Grid container spacing={3} p={1}>
+        <Grid container spacing={3} p={2}>
           {products.map((product, index) => {
             const name = product.bes_title || "No Name";
             const price =
@@ -90,14 +142,15 @@ export const ProductFinderPage: React.FC = () => {
               }
             }
 
+            // Si es el último producto, agregamos el ref para el infinite scroll
+            const isLastProduct = index === products.length - 1;
+
             return (
               <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                lg={3}
+                container
+                size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
                 key={product.bes_id || index}
+                ref={isLastProduct ? lastProductRef : null}
               >
                 <Card
                   sx={{
@@ -107,7 +160,6 @@ export const ProductFinderPage: React.FC = () => {
                     justifyContent: "space-between",
                   }}
                 >
-                  {/* Imagen del producto */}
                   <CardMedia
                     component="img"
                     image={imageURL}
@@ -138,7 +190,6 @@ export const ProductFinderPage: React.FC = () => {
                       Sold last month: {soldLastMonth}
                     </Typography>
 
-                    {/* Botones (sin funcionalidad por ahora) */}
                     <Box mt={2} display="flex" flexDirection="column" gap={1}>
                       <Button
                         variant="contained"
@@ -162,6 +213,13 @@ export const ProductFinderPage: React.FC = () => {
               </Grid>
             );
           })}
+
+          {/* Mostrar el CircularProgress si se está cargando */}
+          {loading && (
+            <Grid display="flex" justifyContent="center" alignItems="center">
+              <CircularProgress size={30} />
+            </Grid>
+          )}
         </Grid>
       )}
     </Box>
