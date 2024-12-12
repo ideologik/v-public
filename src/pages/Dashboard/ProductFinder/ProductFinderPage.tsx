@@ -135,7 +135,13 @@ export const ProductFinderPage: React.FC = () => {
           })}
 
           {loading && (
-            <Grid display="flex" justifyContent="center" alignItems="center">
+            <Grid
+              size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ minHeight: 200 }} // Opcional, para darle altura similar a una tarjeta
+            >
               <CircularProgress size={30} />
             </Grid>
           )}

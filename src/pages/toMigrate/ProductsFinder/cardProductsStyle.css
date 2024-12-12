@@ -1,7 +1,0 @@
-/* En un archivo CSS global o un módulo CSS */
-.slick-slide {
-  height: 30vh !important; /* Asegura que cada slide tenga la misma altura */
-  display: flex !important; /* Permite centrar el contenido */
-  align-items: center !important; /* Alinea verticalmente el contenido al centro */
-  justify-content: center !important; /* Alinea horizontalmente el contenido al centro */
-}
