@@ -9,7 +9,7 @@ interface PotentialProductsFilterState {
   priceRange: [number, number];
   categorySelected: string | null;
   priceRangeSelected: [number, number];
-  sortOption: number;
+  sortOption: string;
   isDataLoaded: boolean;
   selectedProduct: BestsellerProduct | null;
   selectedProductImage: string | null;
@@ -19,7 +19,7 @@ interface PotentialProductsFilterState {
   setCategorySelected: (name: string | null) => void;
   setPriceRange: (range: [number, number]) => void;
   setPriceRangeSelected: (range: [number, number]) => void;
-  setSortOption: (option: number) => void;
+  setSortOption: (option: string) => void;
   setIsDataLoaded: (loaded: boolean) => void;
   setSelectedProduct: (product: BestsellerProduct | null) => void;
   setSelectedProductImage: (url: string | null) => void;
@@ -32,7 +32,7 @@ export const usePotentialProductsFilterStore =
     categorySelected: null,
     priceRange: [0, 10000],
     priceRangeSelected: [0, 10000],
-    sortOption: 0,
+    sortOption: "0",
     isDataLoaded: false,
     selectedProduct: null,
     selectedProductImage: null,

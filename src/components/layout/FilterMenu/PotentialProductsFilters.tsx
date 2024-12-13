@@ -57,111 +57,97 @@ const PotentialProductsFilters: React.FC = () => {
   const handleSortOptionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setSortOption(parseInt(event.target.value, 10));
+    setSortOption(event.target.value);
   };
 
   return (
     <>
-      {!isDataLoaded ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="46px"
-        >
-          <CircularProgress size={30} />
-        </Box>
-      ) : (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            Filter
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-
-          {/* Sourcing Platform */}
-          <Typography variant="body1" gutterBottom>
-            Sourcing Platform
-          </Typography>
-          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-            <InputLabel>Show</InputLabel>
-            <Select
-              label="Show"
-              value={sourcingPlatform}
-              onChange={handleSourcingPlatformChange}
-            >
-              <MenuItem value="all">All Platforms</MenuItem>
-              <MenuItem value="aliexpress">AliExpress</MenuItem>
-              <MenuItem value="cj">CJDropshipping</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Typography variant="body1" gutterBottom>
-            Category
-          </Typography>
-          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-            <InputLabel>Show</InputLabel>
-            <Select
-              label="Show"
-              value={categorySelected === null ? "all" : categorySelected}
-              onChange={(e) => handleCategoryChange(e.target.value as string)}
-            >
-              <MenuItem value="all">All Categories</MenuItem>
-              {categories.map((cat: any) => (
-                <MenuItem key={cat.categoryId} value={cat.category}>
-                  {cat.category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Typography variant="body1" gutterBottom>
-            Price Range
-          </Typography>
-          <Typography variant="body2" gutterBottom sx={{ fontSize: "0.8rem" }}>
-            ${priceRangeSelected[0].toFixed(2)} - $
-            {priceRangeSelected[1].toFixed(2)}
-          </Typography>
-          <Slider
-            sx={{ mb: 2 }}
-            value={priceRangeSelected}
-            onChange={handlePriceChange}
-            valueLabelDisplay="auto"
-            min={priceRange[0]}
-            max={priceRange[1]}
-          />
-
-          <Typography variant="body1" gutterBottom>
-            Sort
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <RadioGroup
-            value={sortOption.toString()}
-            onChange={handleSortOptionChange}
+      <Box>
+        <Typography variant="h6" gutterBottom>
+          Filter
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        {!isDataLoaded && (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="46px"
           >
-            <FormControlLabel value="0" control={<Radio />} label="Relevance" />
-            <FormControlLabel
-              value="1"
-              control={<Radio />}
-              label="Sold Last Month"
-            />
-            <FormControlLabel
-              value="2"
-              control={<Radio />}
-              label="Price Low to High"
-            />
-            <FormControlLabel
-              value="3"
-              control={<Radio />}
-              label="Price High to Low"
-            />
-            <FormControlLabel
-              value="4"
-              control={<Radio />}
-              label="Competition High to Low"
-            />
-          </RadioGroup>
-        </Box>
-      )}
+            <CircularProgress size={30} />
+          </Box>
+        )}
+        {/* Sourcing Platform */}
+        <Typography variant="body1" gutterBottom>
+          Sourcing Platform
+        </Typography>
+        <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+          <InputLabel>Show</InputLabel>
+          <Select
+            label="Show"
+            value={sourcingPlatform}
+            onChange={handleSourcingPlatformChange}
+          >
+            <MenuItem value="all">All Platforms</MenuItem>
+            <MenuItem value="aliexpress">AliExpress</MenuItem>
+            <MenuItem value="cj">CJDropshipping</MenuItem>
+          </Select>
+        </FormControl>
+
+        <Typography variant="body1" gutterBottom>
+          Category
+        </Typography>
+        <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+          <InputLabel>Show</InputLabel>
+          <Select
+            label="Show"
+            value={categorySelected === null ? "all" : categorySelected}
+            onChange={(e) => handleCategoryChange(e.target.value as string)}
+          >
+            <MenuItem value="all">All Categories</MenuItem>
+            {categories.map((cat: any) => (
+              <MenuItem key={cat.categoryId} value={cat.category}>
+                {cat.category}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Typography variant="body1" gutterBottom>
+          Price Range
+        </Typography>
+        <Typography variant="body2" gutterBottom sx={{ fontSize: "0.8rem" }}>
+          ${priceRangeSelected[0].toFixed(2)} - $
+          {priceRangeSelected[1].toFixed(2)}
+        </Typography>
+        <Slider
+          sx={{ mb: 2 }}
+          value={priceRangeSelected}
+          onChange={handlePriceChange}
+          valueLabelDisplay="auto"
+          min={priceRange[0]}
+          max={priceRange[1]}
+        />
+
+        <Typography variant="body1" gutterBottom>
+          Sort
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <RadioGroup value={sortOption} onChange={handleSortOptionChange}>
+          <FormControlLabel value="0" control={<Radio />} label="Relevance" />
+
+          <FormControlLabel
+            value="1"
+            control={<Radio />}
+            label="Price Low to High"
+          />
+          <FormControlLabel
+            value="2"
+            control={<Radio />}
+            label="Price High to Low"
+          />
+        </RadioGroup>
+      </Box>
     </>
   );
 };

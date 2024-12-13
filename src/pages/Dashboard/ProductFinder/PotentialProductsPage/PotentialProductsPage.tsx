@@ -29,9 +29,14 @@ const PotentialProductsPage: React.FC = () => {
     setPriceRangeSelected,
     setIsDataLoaded,
     categorySelected,
+    priceRangeSelected,
+    sortOption,
   } = usePotentialProductsFilterStore();
 
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<UnifiedProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>(
+    []
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -113,15 +118,49 @@ const PotentialProductsPage: React.FC = () => {
     setPriceRange,
     setPriceRangeSelected,
     setIsDataLoaded,
+    setProducts,
   ]);
 
-  // filtrar si la categoria cambia
   useEffect(() => {
-    console.log("categorySelected:", categorySelected);
-  }, [categorySelected]);
-  useEffect(() => {
-    console.log("products:", products);
-  }, [products]);
+    console.log("sortOption:", sortOption);
+    let result = [...products];
+
+    // Filtrar por categoría
+    if (categorySelected && categorySelected !== "all") {
+      result = result.filter((p) => p.category === categorySelected);
+    }
+
+    // Filtrar por rango de precios
+    result = result.filter(
+      (p) =>
+        p.price >= priceRangeSelected[0] && p.price <= priceRangeSelected[1]
+    );
+
+    // Ordenar según sortOption
+    switch (sortOption) {
+      case "1":
+        console.log("entro en case 1");
+        // ordenar por precio ascendente
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "2":
+        // ordenar por precio descendente
+        result.sort((a, b) => b.price - a.price);
+        break;
+
+      default:
+        // sortOption = 0 sin orden específico
+        break;
+    }
+
+    setFilteredProducts(result);
+  }, [
+    products,
+    categorySelected,
+    priceRangeSelected,
+    sortOption,
+    setFilteredProducts,
+  ]);
 
   return (
     <>
@@ -240,7 +279,7 @@ const PotentialProductsPage: React.FC = () => {
             gap="16px"
             justifyContent="center"
           >
-            {products.map((product, index) => (
+            {filteredProducts.map((product, index) => (
               <Box
                 key={index}
                 sx={{

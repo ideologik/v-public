@@ -261,119 +261,118 @@ const ProductFinderFilters: React.FC = () => {
 
   return (
     <>
-      {!isCategoriesLoaded ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="46px"
-        >
-          <CircularProgress size={30} />
-        </Box>
-      ) : (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            Filter
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
+      <Box>
+        <Typography variant="h6" gutterBottom>
+          Filter
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        {!isCategoriesLoaded && (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="46px"
+          >
+            <CircularProgress size={30} />
+          </Box>
+        )}
 
-          <TextField
-            fullWidth
-            label="Search"
-            variant="outlined"
-            value={searchText}
-            onChange={handleSearchTextChange}
-            sx={{ mb: 2 }}
+        <TextField
+          fullWidth
+          label="Search"
+          variant="outlined"
+          value={searchText}
+          onChange={handleSearchTextChange}
+          sx={{ mb: 2 }}
+        />
+
+        <Typography variant="body1" gutterBottom>
+          Category
+        </Typography>
+        <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+          <InputLabel>Show</InputLabel>
+          <Select
+            label="Show"
+            value={categoryId === null ? "all" : categoryId}
+            onChange={(e) => handleCategoryChange("category", e.target.value)}
+          >
+            <MenuItem value="all">All Categories</MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category.categoryId} value={category.categoryId}>
+                {category.category}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Typography variant="body1" gutterBottom>
+          Subcategory
+        </Typography>
+        <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+          <InputLabel>Show</InputLabel>
+          <Select
+            label="Show"
+            value={subCategoryId === null ? "all" : subCategoryId}
+            onChange={(e) =>
+              handleCategoryChange("subCategory", e.target.value)
+            }
+          >
+            <MenuItem value="all">All Sub-Categories</MenuItem>
+            {subCategories.map((subCategory) => (
+              <MenuItem
+                key={subCategory.categoryId}
+                value={subCategory.categoryId}
+              >
+                {subCategory.category}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <Typography variant="body1" gutterBottom>
+          Price Range
+        </Typography>
+        <Typography variant="body2" gutterBottom sx={{ fontSize: "0.8rem" }}>
+          ${priceRangeSelected[0].toFixed(2)} - $
+          {priceRangeSelected[1].toFixed(2)}
+        </Typography>
+        <Slider
+          sx={{ mb: 2 }}
+          value={priceRangeSelected}
+          onChange={handlePriceChange}
+          valueLabelDisplay="auto"
+          min={priceRange[0]}
+          max={priceRange[1]}
+        />
+
+        <Typography variant="body1" gutterBottom>
+          Sort
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <RadioGroup value={sortOption} onChange={handleSortOptionChange}>
+          <FormControlLabel value="0" control={<Radio />} label="Relevance" />
+          <FormControlLabel
+            value="1"
+            control={<Radio />}
+            label="Sold Last Month"
           />
-
-          <Typography variant="body1" gutterBottom>
-            Category
-          </Typography>
-          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-            <InputLabel>Show</InputLabel>
-            <Select
-              label="Show"
-              value={categoryId === null ? "all" : categoryId}
-              onChange={(e) => handleCategoryChange("category", e.target.value)}
-            >
-              <MenuItem value="all">All Categories</MenuItem>
-              {categories.map((category) => (
-                <MenuItem key={category.categoryId} value={category.categoryId}>
-                  {category.category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Typography variant="body1" gutterBottom>
-            Subcategory
-          </Typography>
-          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-            <InputLabel>Show</InputLabel>
-            <Select
-              label="Show"
-              value={subCategoryId === null ? "all" : subCategoryId}
-              onChange={(e) =>
-                handleCategoryChange("subCategory", e.target.value)
-              }
-            >
-              <MenuItem value="all">All Sub-Categories</MenuItem>
-              {subCategories.map((subCategory) => (
-                <MenuItem
-                  key={subCategory.categoryId}
-                  value={subCategory.categoryId}
-                >
-                  {subCategory.category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Typography variant="body1" gutterBottom>
-            Price Range
-          </Typography>
-          <Typography variant="body2" gutterBottom sx={{ fontSize: "0.8rem" }}>
-            ${priceRangeSelected[0].toFixed(2)} - $
-            {priceRangeSelected[1].toFixed(2)}
-          </Typography>
-          <Slider
-            sx={{ mb: 2 }}
-            value={priceRangeSelected}
-            onChange={handlePriceChange}
-            valueLabelDisplay="auto"
-            min={priceRange[0]}
-            max={priceRange[1]}
+          <FormControlLabel
+            value="2"
+            control={<Radio />}
+            label="Price Low to High"
           />
-
-          <Typography variant="body1" gutterBottom>
-            Sort
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <RadioGroup value={sortOption} onChange={handleSortOptionChange}>
-            <FormControlLabel value="0" control={<Radio />} label="Relevance" />
-            <FormControlLabel
-              value="1"
-              control={<Radio />}
-              label="Sold Last Month"
-            />
-            <FormControlLabel
-              value="2"
-              control={<Radio />}
-              label="Price Low to High"
-            />
-            <FormControlLabel
-              value="3"
-              control={<Radio />}
-              label="Price High to Low"
-            />
-            <FormControlLabel
-              value="4"
-              control={<Radio />}
-              label="Competition High to Low"
-            />
-          </RadioGroup>
-        </Box>
-      )}
+          <FormControlLabel
+            value="3"
+            control={<Radio />}
+            label="Price High to Low"
+          />
+          <FormControlLabel
+            value="4"
+            control={<Radio />}
+            label="Competition High to Low"
+          />
+        </RadioGroup>
+      </Box>
     </>
   );
 };
