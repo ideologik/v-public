@@ -44,7 +44,7 @@ export const usePotentialProductsFilterStore =
     selectedProductImage: null,
 
     setSourcingPlatform: (platform) =>
-      set((state) => ({
+      set({
         sourcingPlatform: platform,
         categoryId: null,
         subCategoryId: null,
@@ -52,7 +52,7 @@ export const usePotentialProductsFilterStore =
         subCategories: [],
         isDataLoaded: false,
         // Price range y demás se resetearán luego de la carga de datos
-      })),
+      }),
     setCategories: (categories) => set({ categories }),
     setSubCategories: (sub) => set({ subCategories: sub }),
     setCategoryId: (id) => set({ categoryId: id, subCategoryId: null }),

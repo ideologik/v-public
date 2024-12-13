@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
-import {
-  ArrowUpward,
-  ArrowDownward,
-  HorizontalRule,
-} from "@mui/icons-material";
 import { BestsellerProduct } from "../../../types/productFinder";
 import { usePotentialProductsFilterStore } from "../../../store/potentialProductsFilterStore";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+
+import imageDefault from "../../../assets/images/default-product-image.png";
+import { TrendIcon } from "../../../components/common/TrendIcon";
 
 interface ProductCardProps {
   product: BestsellerProduct;
@@ -19,17 +17,11 @@ interface ProductCardProps {
 }
 
 const getImagesArray = (imageURLs: string | null): string[] => {
-  if (!imageURLs) return ["/assets/images/default-product-image.png"];
+  if (!imageURLs) return [imageDefault];
   return imageURLs
     .split(",")
     .map((url) => url.trim())
     .filter((url) => url !== "");
-};
-
-const getTrendIcon = (current: number, average: number) => {
-  if (current > average) return <ArrowUpward style={{ color: "green" }} />;
-  if (current < average) return <ArrowDownward style={{ color: "red" }} />;
-  return <HorizontalRule style={{ color: "gray" }} />;
 };
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -182,33 +174,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </Typography>
         <Typography variant="body2" color="textSecondary">
           Sales Rank: {product.bes_salesrank ?? "N/A"}{" "}
-          <Box component="span" sx={{ verticalAlign: "middle" }}>
-            {getTrendIcon(
-              product.bes_salesrank ?? 0,
-              product.bes_salesrank90DaysAverage ?? 0
-            )}
-          </Box>
+          <TrendIcon
+            current={product.bes_salesrank ?? 0}
+            average={product.bes_salesrank90DaysAverage ?? 0}
+          />
         </Typography>
         <Typography variant="body2" color="textSecondary">
           Sold last month: {soldLastMonth}
         </Typography>
         <Typography variant="body2" color="textSecondary">
           Price Trend:
-          <Box component="span" sx={{ verticalAlign: "middle" }}>
-            {getTrendIcon(
-              product.bes_price ?? 0,
-              product.bes_priceBuyBox90DaysAverage ?? 0
-            )}
-          </Box>
+          <TrendIcon
+            current={product.bes_price ?? 0}
+            average={product.bes_priceBuyBox90DaysAverage ?? 0}
+          />
         </Typography>
         <Typography variant="body2" color="textSecondary">
           Competition Trend:
-          <Box component="span" sx={{ verticalAlign: "middle" }}>
-            {getTrendIcon(
-              product.bes_newOfferCount ?? 0,
-              product.bes_newOfferCount90DaysAverage ?? 0
-            )}
-          </Box>
+          <TrendIcon
+            current={product.bes_newOfferCount ?? 0}
+            average={product.bes_newOfferCount90DaysAverage ?? 0}
+          />
         </Typography>
 
         <Box mt={2} display="flex" flexDirection="column" gap={1}>

@@ -7,7 +7,7 @@ import Login from "../pages/Auth/Login/Login";
 import { MyProductsPage } from "../pages/Dashboard/MyProducts/MyProductsPage";
 import UnauthorizedPage from "../pages/Errors/UnauthorizedPage";
 import NotFoundPage from "../pages/Errors/NotFoundPage";
-import { PotentialProductsPage } from "../pages/Dashboard/ProductFinder/PotentialProductsPage/PotentialProductsPage";
+import PotentialProductsPage from "../pages/Dashboard/ProductFinder/PotentialProductsPage/PotentialProductsPage";
 
 // Este sería el componente que mostrará resultados de AE y CJ juntos.
 

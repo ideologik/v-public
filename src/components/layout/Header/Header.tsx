@@ -18,7 +18,7 @@ const Header = () => {
 
   // Definimos las rutas del menú
   const menuItems = [
-    { label: "Products Finder", to: "/" },
+    { label: "Products Finder", to: "/product-finder" },
     { label: "My Products", to: "/my-products" },
     { label: "Settings", to: "/settings" },
     { label: "Support", to: "/support" },
@@ -54,7 +54,7 @@ const Header = () => {
         <Toolbar>
           <Box sx={{ display: "flex", gap: 2, flexGrow: 1 }}>
             {menuItems.map((item) => {
-              const isActive = location.pathname === item.to;
+              const isActive = location.pathname.includes(item.to);
               return (
                 <Button
                   key={item.to}

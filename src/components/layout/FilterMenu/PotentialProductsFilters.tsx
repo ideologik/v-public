@@ -7,7 +7,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   CircularProgress,
   Box,
   Slider,
@@ -15,6 +14,7 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import { usePotentialProductsFilterStore } from "../../../store/potentialProductsFilterStore";
 
@@ -27,22 +27,18 @@ const PotentialProductsFilters: React.FC = () => {
     subCategoryId,
     priceRange,
     priceRangeSelected,
-
     sortOption,
     isDataLoaded,
     setSourcingPlatform,
     setCategoryId,
     setSubCategoryId,
     setPriceRangeSelected,
-
     setSortOption,
   } = usePotentialProductsFilterStore();
 
-  const handleSourcingPlatformChange = (
-    e: React.ChangeEvent<{ value: unknown }>
-  ) => {
+  const handleSourcingPlatformChange = (e: SelectChangeEvent) => {
     const value = e.target.value as "all" | "aliexpress" | "cj";
-    setSourcingPlatform(value); // Esto disparará en la página la recarga de datos
+    setSourcingPlatform(value);
   };
 
   const handleCategoryChange = (value: string | number) => {
@@ -64,6 +60,7 @@ const PotentialProductsFilters: React.FC = () => {
   };
 
   const handlePriceChange = (event: Event, value: number | number[]) => {
+    console.log(event);
     if (Array.isArray(value)) {
       setPriceRangeSelected([value[0], value[1]]);
     }
