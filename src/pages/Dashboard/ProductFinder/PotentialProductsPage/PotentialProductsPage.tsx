@@ -7,7 +7,6 @@ import {
   CircularProgress,
   Card,
   CardContent,
-  Paper,
   Tooltip,
   Button,
 } from "@mui/material";
@@ -17,6 +16,7 @@ import { getCjDropshippingByImage } from "../../../../api/cjDropshippingService"
 import { usePotentialProductsFilterStore } from "../../../../store/potentialProductsFilterStore";
 import imageDefault from "../../../../assets/images/default-product-image.png";
 import { TrendIcon } from "../../../../components/common/TrendIcon";
+import { UnifiedProduct } from "../../../../types/potentialProduct";
 
 const PotentialProductsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,10 +25,10 @@ const PotentialProductsPage: React.FC = () => {
     selectedProductImage,
     sourcingPlatform,
     setCategories,
-    setSubCategories,
     setPriceRange,
     setPriceRangeSelected,
     setIsDataLoaded,
+    categorySelected,
   } = usePotentialProductsFilterStore();
 
   const [products, setProducts] = useState<any[]>([]);
@@ -51,7 +51,7 @@ const PotentialProductsPage: React.FC = () => {
       setIsDataLoaded(false);
 
       try {
-        let fetchedProducts: any[] = [];
+        let fetchedProducts: UnifiedProduct[] = [];
 
         if (sourcingPlatform === "aliexpress") {
           fetchedProducts = await aliExpressFindByImage(selectedProductImage);
@@ -65,7 +65,7 @@ const PotentialProductsPage: React.FC = () => {
           fetchedProducts = [...ae, ...cj];
         }
 
-        // Extraer categorías únicas de los productos
+        // Extraer categorías únicas
         const uniqueCategories = Array.from(
           new Set(
             fetchedProducts
@@ -81,23 +81,7 @@ const PotentialProductsPage: React.FC = () => {
           })
         );
 
-        // Extraer subcategorías únicas
-        const uniqueSubCategories = Array.from(
-          new Set(
-            fetchedProducts
-              .map((prod) => prod.subcategory)
-              .filter((sub: string | undefined) => sub && sub.trim() !== "")
-          )
-        );
-
-        const subCategories = uniqueSubCategories.map(
-          (sub: string, index: number) => ({
-            categoryId: 100 + index + 1,
-            category: sub,
-          })
-        );
-
-        // Determinar rango de precios a partir de los productos, por ejemplo:
+        // Determinar rango de precios
         const prices = fetchedProducts.map((p: any) => p.price);
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
@@ -107,7 +91,6 @@ const PotentialProductsPage: React.FC = () => {
         ];
 
         setCategories(categories);
-        setSubCategories(subCategories);
         setPriceRange(priceRange);
         setPriceRangeSelected(priceRange);
 
@@ -127,11 +110,18 @@ const PotentialProductsPage: React.FC = () => {
     selectedProductImage,
     sourcingPlatform,
     setCategories,
-    setSubCategories,
     setPriceRange,
     setPriceRangeSelected,
     setIsDataLoaded,
   ]);
+
+  // filtrar si la categoria cambia
+  useEffect(() => {
+    console.log("categorySelected:", categorySelected);
+  }, [categorySelected]);
+  useEffect(() => {
+    console.log("products:", products);
+  }, [products]);
 
   return (
     <>
@@ -156,76 +146,92 @@ const PotentialProductsPage: React.FC = () => {
           </Typography>
         </Box>
       ) : selectedProduct ? (
-        <Box display="flex" flexDirection="column" width="100%" p={1}>
-          <Card>
-            <Box display="flex" gap="16px" alignItems="center">
-              <Box flexShrink={0} width="20%">
-                <img
-                  src={selectedProductImage || imageDefault}
-                  alt={`${selectedProduct.bes_title}`}
-                  style={{
-                    width: "100%",
-                    height: "200px",
-                    objectFit: "contain",
-                    cursor: "pointer",
-                  }}
-                />
+        <Box p={1} width="100%">
+          {/* Card del producto seleccionado */}
+          <Box>
+            <Card>
+              <Box
+                display="flex"
+                gap="16px"
+                alignItems="center"
+                p={1}
+                minWidth={0}
+              >
+                <Box flexShrink={0} width="20%">
+                  <img
+                    src={selectedProductImage || imageDefault}
+                    alt={`${selectedProduct.bes_title}`}
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      objectFit: "contain",
+                      cursor: "pointer",
+                    }}
+                  />
+                </Box>
+                <CardContent sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+                  <Tooltip title={selectedProduct.bes_title}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        mb: 1,
+                        display: "block",
+                        maxWidth: "100%",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {selectedProduct.bes_title}
+                    </Typography>
+                  </Tooltip>
+                  <Typography variant="body2" color="textSecondary">
+                    Brand: {selectedProduct.bes_brand || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Current Price: $
+                    {selectedProduct.bes_price
+                      ? selectedProduct.bes_price.toFixed(2)
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Sales Rank: {selectedProduct.bes_salesrank || "N/A"}
+                    <TrendIcon
+                      current={selectedProduct.bes_salesrank ?? 0}
+                      average={selectedProduct.bes_salesrank90DaysAverage ?? 0}
+                    />
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Bought in past month: &nbsp;
+                    {selectedProduct.bes_boughtInPastMonth
+                      ? selectedProduct.bes_boughtInPastMonth + "+"
+                      : "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Price Trend:
+                    <TrendIcon
+                      current={selectedProduct.bes_price ?? 0}
+                      average={
+                        selectedProduct.bes_priceBuyBox90DaysAverage ?? 0
+                      }
+                    />
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Competition Trend:
+                    <TrendIcon
+                      current={selectedProduct.bes_newOfferCount ?? 0}
+                      average={
+                        selectedProduct.bes_newOfferCount90DaysAverage ?? 0
+                      }
+                    />
+                  </Typography>
+                </CardContent>
               </Box>
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    mb: 1,
-                  }}
-                >
-                  {selectedProduct.bes_title}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Brand: {selectedProduct.bes_brand || "N/A"}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Current Price: $
-                  {selectedProduct.bes_price
-                    ? selectedProduct.bes_price.toFixed(2)
-                    : "N/A"}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Sales Rank: {selectedProduct.bes_salesrank || "N/A"}
-                  <TrendIcon
-                    current={selectedProduct.bes_salesrank ?? 0}
-                    average={selectedProduct.bes_salesrank90DaysAverage ?? 0}
-                  />
-                </Typography>
-                <Typography variant="h6" color="textSecondary">
-                  Bought in past month: &nbsp;
-                  {selectedProduct.bes_boughtInPastMonth
-                    ? selectedProduct.bes_boughtInPastMonth + "+"
-                    : "N/A"}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Price Trend:
-                  <TrendIcon
-                    current={selectedProduct.bes_price ?? 0}
-                    average={selectedProduct.bes_priceBuyBox90DaysAverage ?? 0}
-                  />
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Competition Trend:
-                  <TrendIcon
-                    current={selectedProduct.bes_newOfferCount ?? 0}
-                    average={
-                      selectedProduct.bes_newOfferCount90DaysAverage ?? 0
-                    }
-                  />
-                </Typography>
-              </CardContent>
-            </Box>
-          </Card>
+            </Card>
+          </Box>
 
-          {/* Aqui NO se renderiza PotentialProductsFilters, el layout lo hace */}
+          {/* Lista de productos encontrados */}
           <Box
             mt={2}
             width="100%"
@@ -237,19 +243,19 @@ const PotentialProductsPage: React.FC = () => {
             {products.map((product, index) => (
               <Box
                 key={index}
-                width={{
-                  xs: "100%",
-                  sm: "calc(50% - 16px)",
-                  md: "calc(33.33% - 16px)",
-                  lg: "calc(25% - 16px)",
+                sx={{
+                  width: {
+                    xs: "100%",
+                    sm: "calc(50% - 16px)",
+                    md: "calc(33.33% - 16px)",
+                    lg: "calc(25% - 16px)",
+                  },
                 }}
                 mb={2}
               >
                 <Card>
                   <img
-                    src={
-                      product.image || "/assets/imgs/default-product-image.png"
-                    }
+                    src={product.image || imageDefault}
                     alt={product.name}
                     style={{
                       width: "100%",
@@ -262,10 +268,11 @@ const PotentialProductsPage: React.FC = () => {
                     <Tooltip title={product.name}>
                       <Typography
                         variant="h6"
-                        style={{
+                        sx={{
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          cursor: "pointer",
                         }}
                       >
                         {product.name}
@@ -274,7 +281,7 @@ const PotentialProductsPage: React.FC = () => {
                     <Tooltip title={product.category}>
                       <Typography
                         variant="body2"
-                        style={{
+                        sx={{
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -288,7 +295,6 @@ const PotentialProductsPage: React.FC = () => {
                       Price: ${product.price.toFixed(2)}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {/* Ejemplo: si selectedProduct.bes_price es Amazon Price y product.price es AE/CJ Price */}
                       DOA: $
                       {selectedProduct.bes_price && product.price
                         ? (selectedProduct.bes_price - product.price).toFixed(2)

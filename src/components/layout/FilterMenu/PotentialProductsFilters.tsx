@@ -22,16 +22,13 @@ const PotentialProductsFilters: React.FC = () => {
   const {
     sourcingPlatform,
     categories,
-    subCategories,
-    categoryId,
-    subCategoryId,
     priceRange,
     priceRangeSelected,
+    categorySelected,
     sortOption,
     isDataLoaded,
     setSourcingPlatform,
-    setCategoryId,
-    setSubCategoryId,
+    setCategorySelected,
     setPriceRangeSelected,
     setSortOption,
   } = usePotentialProductsFilterStore();
@@ -41,21 +38,12 @@ const PotentialProductsFilters: React.FC = () => {
     setSourcingPlatform(value);
   };
 
-  const handleCategoryChange = (value: string | number) => {
+  const handleCategoryChange = (value: string) => {
     if (value === "all") {
-      setCategoryId(null);
+      setCategorySelected(null);
     } else {
-      const val = typeof value === "number" ? value : Number(value);
-      setCategoryId(isNaN(val) ? null : val);
-    }
-  };
-
-  const handleSubCategoryChange = (value: string | number) => {
-    if (value === "all") {
-      setSubCategoryId(null);
-    } else {
-      const val = typeof value === "number" ? value : Number(value);
-      setSubCategoryId(isNaN(val) ? null : val);
+      // Aquí 'value' es el nombre de la categoría
+      setCategorySelected(value);
     }
   };
 
@@ -69,7 +57,7 @@ const PotentialProductsFilters: React.FC = () => {
   const handleSortOptionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setSortOption(event.target.value);
+    setSortOption(parseInt(event.target.value, 10));
   };
 
   return (
@@ -114,36 +102,13 @@ const PotentialProductsFilters: React.FC = () => {
             <InputLabel>Show</InputLabel>
             <Select
               label="Show"
-              value={categoryId === null ? "all" : categoryId}
-              onChange={(e) =>
-                handleCategoryChange(e.target.value as string | number)
-              }
+              value={categorySelected === null ? "all" : categorySelected}
+              onChange={(e) => handleCategoryChange(e.target.value as string)}
             >
               <MenuItem value="all">All Categories</MenuItem>
               {categories.map((cat: any) => (
-                <MenuItem key={cat.categoryId} value={cat.categoryId}>
+                <MenuItem key={cat.categoryId} value={cat.category}>
                   {cat.category}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Typography variant="body1" gutterBottom>
-            Subcategory
-          </Typography>
-          <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-            <InputLabel>Show</InputLabel>
-            <Select
-              label="Show"
-              value={subCategoryId === null ? "all" : subCategoryId}
-              onChange={(e) =>
-                handleSubCategoryChange(e.target.value as string | number)
-              }
-            >
-              <MenuItem value="all">All Sub-Categories</MenuItem>
-              {subCategories.map((sub: any) => (
-                <MenuItem key={sub.categoryId} value={sub.categoryId}>
-                  {sub.category}
                 </MenuItem>
               ))}
             </Select>
@@ -169,7 +134,10 @@ const PotentialProductsFilters: React.FC = () => {
             Sort
           </Typography>
           <Divider sx={{ mb: 2 }} />
-          <RadioGroup value={sortOption} onChange={handleSortOptionChange}>
+          <RadioGroup
+            value={sortOption.toString()}
+            onChange={handleSortOptionChange}
+          >
             <FormControlLabel value="0" control={<Radio />} label="Relevance" />
             <FormControlLabel
               value="1"
