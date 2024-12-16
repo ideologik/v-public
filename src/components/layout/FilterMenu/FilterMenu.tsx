@@ -6,6 +6,7 @@ import ProductFinderFilters from "./ProductFinderFilters";
 import MyProductsFilters from "./MyProductsFilters";
 import { useFilterStore } from "../../../store/filterStore";
 import PotentialProductsFilters from "./PotentialProductsFilters";
+import AnalyzeProductFilters from "./AnalyzeProductFilters";
 
 interface FilterMenuProps {
   filterType?: string;
@@ -30,11 +31,13 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             sx={{
               borderRadius: 2, // Bordes redondeados
               p: 2, // Padding interno para los contenidos del filtro
+              minHeight: "100%",
             }}
           >
             {filterType === "productFinder" && <ProductFinderFilters />}
             {filterType === "myProducts" && <MyProductsFilters />}
             {filterType === "potentialProducts" && <PotentialProductsFilters />}
+            {filterType === "analyzeProducts" && <AnalyzeProductFilters />}
           </Card>
         </Box>
       </Slide>

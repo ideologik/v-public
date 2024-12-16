@@ -146,6 +146,16 @@ const PotentialProductsFilters: React.FC = () => {
             control={<Radio />}
             label="Price High to Low"
           />
+          <FormControlLabel
+            value="4"
+            control={<Radio />}
+            label="DOA High to Low"
+          />
+          <FormControlLabel
+            value="3"
+            control={<Radio />}
+            label="DOA Low to High"
+          />
         </RadioGroup>
       </Box>
     </>

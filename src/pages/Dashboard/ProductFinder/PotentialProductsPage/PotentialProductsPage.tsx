@@ -13,16 +13,16 @@ import {
 import { useNavigate } from "react-router-dom";
 import { aliExpressFindByImage } from "../../../../api/aliexpressService";
 import { getCjDropshippingByImage } from "../../../../api/cjDropshippingService";
-import { usePotentialProductsFilterStore } from "../../../../store/potentialProductsFilterStore";
+
 import imageDefault from "../../../../assets/images/default-product-image.png";
 import { TrendIcon } from "../../../../components/common/TrendIcon";
 import { UnifiedProduct } from "../../../../types/potentialProduct";
+import { useSelectedProductsStore } from "../../../../store/selectedProductsStore";
+import { usePotentialProductsFilterStore } from "../../../../store/potentialProductsFilterStore";
 
 const PotentialProductsPage: React.FC = () => {
   const navigate = useNavigate();
   const {
-    selectedProduct,
-    selectedProductImage,
     sourcingPlatform,
     setCategories,
     setPriceRange,
@@ -32,6 +32,7 @@ const PotentialProductsPage: React.FC = () => {
     priceRangeSelected,
     sortOption,
   } = usePotentialProductsFilterStore();
+  const { selectedProduct, selectedProductImage } = useSelectedProductsStore();
 
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>(
@@ -40,9 +41,12 @@ const PotentialProductsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { setSelectedProductForAnalysys } = useSelectedProductsStore();
+
   const handleShowProductDetails = (product: any) => {
     console.log("Product details:", product);
-    navigate("/product-finder/aliexpress-details");
+    setSelectedProductForAnalysys(product);
+    navigate("/product-finder/analyze-product");
   };
 
   useEffect(() => {
@@ -135,17 +139,31 @@ const PotentialProductsPage: React.FC = () => {
       (p) =>
         p.price >= priceRangeSelected[0] && p.price <= priceRangeSelected[1]
     );
+    result = result.map((product) => ({
+      ...product,
+      doa:
+        selectedProduct && selectedProduct.bes_price && product.price
+          ? selectedProduct.bes_price - product.price
+          : 0,
+    }));
 
     // Ordenar según sortOption
     switch (sortOption) {
       case "1":
-        console.log("entro en case 1");
         // ordenar por precio ascendente
         result.sort((a, b) => a.price - b.price);
         break;
       case "2":
         // ordenar por precio descendente
         result.sort((a, b) => b.price - a.price);
+        break;
+      case "3":
+        // ordenar por doa ascendente
+        result.sort((a, b) => (a as any).doa - (b as any).doa);
+        break;
+      case "4":
+        // ordenar por doa descendente
+        result.sort((a, b) => (b as any).doa - (a as any).doa);
         break;
 
       default:
@@ -160,6 +178,7 @@ const PotentialProductsPage: React.FC = () => {
     priceRangeSelected,
     sortOption,
     setFilteredProducts,
+    selectedProduct,
   ]);
 
   return (
@@ -270,7 +289,12 @@ const PotentialProductsPage: React.FC = () => {
             </Card>
           </Box>
 
-          {/* Lista de productos encontrados */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h5" color="textSecondary">
+              Similar Products
+            </Typography>
+          </Box>
+          {/* Lista de productos similares */}
           <Box
             mt={2}
             width="100%"
@@ -279,97 +303,101 @@ const PotentialProductsPage: React.FC = () => {
             gap="16px"
             justifyContent="center"
           >
-            {filteredProducts.map((product, index) => (
-              <Box
-                key={index}
-                sx={{
-                  width: {
-                    xs: "100%",
-                    sm: "calc(50% - 16px)",
-                    md: "calc(33.33% - 16px)",
-                    lg: "calc(25% - 16px)",
-                  },
-                }}
-                mb={2}
-              >
-                <Card>
-                  <img
-                    src={product.image || imageDefault}
-                    alt={product.name}
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "contain",
-                      padding: "10px",
-                    }}
-                  />
-                  <CardContent>
-                    <Tooltip title={product.name}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {product.name}
+            {filteredProducts.map((product, index) => {
+              const doa =
+                selectedProduct.bes_price && product.price
+                  ? selectedProduct.bes_price - product.price
+                  : 0;
+              return (
+                <Box
+                  key={index}
+                  sx={{
+                    width: {
+                      xs: "100%",
+                      sm: "calc(50% - 16px)",
+                      md: "calc(33.33% - 16px)",
+                      lg: "calc(25% - 16px)",
+                    },
+                  }}
+                  mb={2}
+                >
+                  <Card>
+                    <img
+                      src={product.image || imageDefault}
+                      alt={product.name}
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        objectFit: "contain",
+                        padding: "10px",
+                      }}
+                    />
+                    <CardContent>
+                      <Tooltip title={product.name}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {product.name}
+                        </Typography>
+                      </Tooltip>
+                      <Tooltip title={product.category}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                          color="textSecondary"
+                        >
+                          Category: {product.category || "N/A"}
+                        </Typography>
+                      </Tooltip>
+                      <Typography variant="body2" color="textSecondary">
+                        Platform: {product.platform}
                       </Typography>
-                    </Tooltip>
-                    <Tooltip title={product.category}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                        color="textSecondary"
-                      >
-                        Category: {product.category || "N/A"}
+                      <Typography variant="body2" color="textSecondary">
+                        Price: ${product.price.toFixed(2)}
                       </Typography>
-                    </Tooltip>
-                    <Typography variant="body2" color="textSecondary">
-                      Price: ${product.price.toFixed(2)}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      DOA: $
-                      {selectedProduct.bes_price && product.price
-                        ? (selectedProduct.bes_price - product.price).toFixed(2)
-                        : "0.00"}{" "}
-                      USD
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Potential Profit: $
-                      {selectedProduct.bes_price &&
-                      product.price &&
-                      selectedProduct.bes_boughtInPastMonth
-                        ? (
-                            (selectedProduct.bes_price - product.price) *
-                            selectedProduct.bes_boughtInPastMonth
-                          ).toFixed(2)
-                        : "0.00"}{" "}
-                      USD
-                    </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        DOA: ${doa.toFixed(2)}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Potential Profit: $
+                        {selectedProduct.bes_price &&
+                        product.price &&
+                        selectedProduct.bes_boughtInPastMonth
+                          ? (
+                              (selectedProduct.bes_price - product.price) *
+                              selectedProduct.bes_boughtInPastMonth
+                            ).toFixed(2)
+                          : "0.00"}
+                      </Typography>
 
-                    <Box mt={2}>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        color="primary"
-                        onClick={() => {
-                          handleShowProductDetails(product);
-                        }}
-                        rel="noopener noreferrer"
-                      >
-                        Analyze Product
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))}
+                      <Box mt={2}>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          color="primary"
+                          onClick={() => {
+                            handleShowProductDetails(product);
+                          }}
+                          rel="noopener noreferrer"
+                        >
+                          Analyze Product
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              );
+            })}
           </Box>
         </Box>
       ) : (

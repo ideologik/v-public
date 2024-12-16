@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import { BestsellerProduct } from "../../../types/productFinder";
 import { usePotentialProductsFilterStore } from "../../../store/potentialProductsFilterStore";
+import { useSelectedProductsStore } from "../../../store/selectedProductsStore";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -31,8 +32,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const SlickSlider = Slider as unknown as React.ComponentType<any>;
   const navigate = useNavigate();
 
-  const { setSelectedProduct, setSourcingPlatform, setSelectedProductImage } =
-    usePotentialProductsFilterStore();
+  const { setSourcingPlatform } = usePotentialProductsFilterStore();
+  const { setSelectedProduct, setSelectedProductImage } =
+    useSelectedProductsStore();
 
   const name = product.bes_title || "No Name";
   const category = product.bes_productGroup || "N/A";

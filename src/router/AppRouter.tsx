@@ -8,8 +8,7 @@ import { MyProductsPage } from "../pages/Dashboard/MyProducts/MyProductsPage";
 import UnauthorizedPage from "../pages/Errors/UnauthorizedPage";
 import NotFoundPage from "../pages/Errors/NotFoundPage";
 import PotentialProductsPage from "../pages/Dashboard/ProductFinder/PotentialProductsPage/PotentialProductsPage";
-
-// Este sería el componente que mostrará resultados de AE y CJ juntos.
+import AnalyzeProduct from "../pages/Dashboard/ProductFinder/PotentialProductsPage/AnalyzeProduct";
 
 const AppRouter = () => {
   return (
@@ -28,14 +27,10 @@ const AppRouter = () => {
       >
         <Route index element={<ProductFinderPage />} />
         <Route path="my-products" element={<MyProductsPage />} />
-
-        {/* Rutas hijas de product-finder */}
         <Route path="product-finder">
-          {/* Página principal de Product Finder */}
           <Route index element={<ProductFinderPage />} />
-
-          {/* Página para mostrar resultados (AE, CJ o mixto) */}
           <Route path="results" element={<PotentialProductsPage />} />
+          <Route path="analyze-product" element={<AnalyzeProduct />} />
         </Route>
       </Route>
     </Routes>

@@ -51,13 +51,13 @@ export const getProductFinderByAsin = async (
 // GET /io/ProductFinder/ProductDetails
 // Retorna datos de un producto con históricos, usando `BestsellerProductDetails`
 export const getProductDetails = async (
-  productId: string | number
+  asin: string | number
 ): Promise<BestsellerProductDetails> => {
   try {
     const data = await axiosClient.get<BestsellerProductDetails>(
       "ProductFinder/ProductDetails",
       {
-        params: { productId },
+        params: { asin },
       }
     );
     return data;
