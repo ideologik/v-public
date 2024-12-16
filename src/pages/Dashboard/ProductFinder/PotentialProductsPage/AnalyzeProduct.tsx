@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -12,8 +11,8 @@ import {
   CardContent,
   Paper,
   Slider,
-  Button,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -84,8 +83,6 @@ const AnalyzeProduct: React.FC = () => {
 
   const [productDetails, setProductDetails] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-
-  // Nuevo estado para suggestedPrice
   const [suggestedPrice, setSuggestedPrice] = useState<number>(
     selectedProduct?.bes_price || 0
   );
@@ -161,10 +158,10 @@ const AnalyzeProduct: React.FC = () => {
     };
   }, [selectedProduct, selectedProductForAnalysys, suggestedPrice]);
 
-  // Función para calcular potencial ganancia mensual
+  // Cálculo de la ganancia potencial
   const calculatePotentialProfit = () => {
     const aePrice = selectedProductForAnalysys?.price || 0;
-    const monthlySales = selectedProduct.bes_boughtInPastMonth || 0;
+    const monthlySales = selectedProduct?.bes_boughtInPastMonth || 0;
     const profitPerUnit = suggestedPrice - aePrice;
     return (profitPerUnit * monthlySales).toFixed(2);
   };
@@ -174,9 +171,6 @@ const AnalyzeProduct: React.FC = () => {
       {/* Encabezado y breadcrumbs */}
       <Typography variant="h5" gutterBottom>
         Analyze Product
-      </Typography>
-      <Typography variant="body2" color="textSecondary" gutterBottom>
-        Products Finder &gt; Find Potential Products &gt; Analyze Product
       </Typography>
       {loading || !selectedProduct ? (
         <Box
@@ -190,53 +184,98 @@ const AnalyzeProduct: React.FC = () => {
       ) : productDetails ? (
         <>
           <Box mt={2}>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} alignItems="stretch">
               {/* Columna Izquierda: Imágenes */}
-              <Grid item xs={12} md={3}>
-                <Box display="flex">
-                  <Box mr={2} display="flex" flexDirection="column" gap="8px">
-                    {/* Miniaturas estáticas (placeholder) */}
-                    {[...Array(5)].map((_, i) => (
+              <Grid
+                size={{ xs: 12, md: 4 }}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <CardContent sx={{ flex: 1, display: "flex" }}>
+                    <Box display="flex" flex="1">
                       <Box
-                        key={i}
+                        mr={2}
+                        display="flex"
+                        flexDirection="column"
+                        gap="8px"
+                        justifyContent="flex-start"
+                      >
+                        {/* Miniaturas (ejemplo estático) */}
+                        {[...Array(5)].map((_, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              width: "50px",
+                              height: "50px",
+                              backgroundColor: "#ccc",
+                              border: "1px solid #ddd",
+                            }}
+                          />
+                        ))}
+                      </Box>
+                      <Box
+                        flex={1}
                         sx={{
-                          width: "50px",
-                          height: "50px",
-                          backgroundColor: "#ccc",
+                          border: "1px solid #ddd",
+                          width: "100%",
+                          aspectRatio: "1 / 1",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#f9f9f9",
                         }}
-                      />
-                    ))}
-                  </Box>
-                  <Box
-                    flex={1}
-                    sx={{
-                      border: "1px solid #ddd",
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "#f9f9f9",
-                    }}
-                  >
-                    <img
-                      src={selectedProductForAnalysys?.image || imageDefault}
-                      alt={selectedProductForAnalysys?.name || "Product"}
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </Box>
-                </Box>
+                      >
+                        <img
+                          src={
+                            selectedProductForAnalysys?.image || imageDefault
+                          }
+                          alt={selectedProductForAnalysys?.name || "Product"}
+                          onError={(e) => {
+                            e.currentTarget.src = imageDefault;
+                          }}
+                          referrerPolicy="no-referrer"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
               </Grid>
 
-              {/* Columna Derecha: Detalles (Ajustada para verse como la versión anterior) */}
-              <Grid item xs={12} md={9}>
-                <Paper elevation={4} sx={{ padding: 2, borderRadius: 2 }}>
-                  <Card sx={{ borderRadius: 2 }}>
-                    <CardContent>
+              {/* Columna Derecha: Detalles */}
+              <Grid
+                size={{ xs: 12, md: 8 }}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Paper
+                  elevation={4}
+                  sx={{
+                    padding: 2,
+                    borderRadius: 2,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Card
+                    sx={{
+                      borderRadius: 2,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <CardContent sx={{ flex: 1 }}>
                       <Typography variant="h6" gutterBottom>
                         {selectedProductForAnalysys?.name || "Product Name"}
                       </Typography>
@@ -331,11 +370,12 @@ const AnalyzeProduct: React.FC = () => {
                           min={selectedProductForAnalysys?.price || 0}
                           max={(selectedProduct.bes_price || 0) * 1.5}
                           step={0.01}
-                          onChange={(e, newValue) =>
+                          onChange={(_, newValue) =>
                             setSuggestedPrice(newValue as number)
                           }
                           valueLabelDisplay="auto"
                           aria-label="Suggested Price Slider"
+                          sx={{ color: "#7CB342" }}
                         />
                       </Box>
 

@@ -325,6 +325,10 @@ const PotentialProductsPage: React.FC = () => {
                     <img
                       src={product.image || imageDefault}
                       alt={product.name}
+                      onError={(e) => {
+                        e.currentTarget.src = imageDefault;
+                      }}
+                      referrerPolicy="no-referrer"
                       style={{
                         width: "100%",
                         height: "200px",
