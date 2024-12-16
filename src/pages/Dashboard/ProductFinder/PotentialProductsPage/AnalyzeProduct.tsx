@@ -8,6 +8,11 @@ import {
   Select,
   MenuItem,
   CircularProgress,
+  Card,
+  CardContent,
+  Paper,
+  Slider,
+  Button,
 } from "@mui/material";
 import { Bar, Line } from "react-chartjs-2";
 import {
@@ -80,6 +85,11 @@ const AnalyzeProduct: React.FC = () => {
   const [productDetails, setProductDetails] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  // Nuevo estado para suggestedPrice
+  const [suggestedPrice, setSuggestedPrice] = useState<number>(
+    selectedProduct?.bes_price || 0
+  );
+
   useEffect(() => {
     const fetchDetails = async () => {
       if (!selectedProduct || !selectedProduct.bes_asin) return;
@@ -96,7 +106,6 @@ const AnalyzeProduct: React.FC = () => {
     fetchDetails();
   }, [selectedProduct]);
 
-  // Filtrar datos históricos según dateRange
   const filteredMonthlySold = useMemo(
     () => filterDataByRange(productDetails?.historyMonthlySold, dateRange),
     [productDetails, dateRange]
@@ -136,10 +145,8 @@ const AnalyzeProduct: React.FC = () => {
     };
   }, [filteredRating]);
 
-  // Ejemplo de gráfica estática (no filtrada por tiempo)
   const priceComparisonData = useMemo(() => {
     if (!selectedProduct || !selectedProductForAnalysys) return null;
-    const suggestedPrice = selectedProduct.bes_price ?? 0;
     const aePrice = selectedProductForAnalysys?.price ?? 0;
 
     return {
@@ -152,7 +159,15 @@ const AnalyzeProduct: React.FC = () => {
         },
       ],
     };
-  }, [selectedProduct, selectedProductForAnalysys]);
+  }, [selectedProduct, selectedProductForAnalysys, suggestedPrice]);
+
+  // Función para calcular potencial ganancia mensual
+  const calculatePotentialProfit = () => {
+    const aePrice = selectedProductForAnalysys?.price || 0;
+    const monthlySales = selectedProduct.bes_boughtInPastMonth || 0;
+    const profitPerUnit = suggestedPrice - aePrice;
+    return (profitPerUnit * monthlySales).toFixed(2);
+  };
 
   return (
     <Box p={1} width="100%">
@@ -180,7 +195,7 @@ const AnalyzeProduct: React.FC = () => {
               <Grid item xs={12} md={3}>
                 <Box display="flex">
                   <Box mr={2} display="flex" flexDirection="column" gap="8px">
-                    {/* Miniaturas (ejemplo estático) */}
+                    {/* Miniaturas estáticas (placeholder) */}
                     {[...Array(5)].map((_, i) => (
                       <Box
                         key={i}
@@ -217,43 +232,124 @@ const AnalyzeProduct: React.FC = () => {
                 </Box>
               </Grid>
 
-              {/* Columna Derecha: Detalles */}
+              {/* Columna Derecha: Detalles (Ajustada para verse como la versión anterior) */}
               <Grid item xs={12} md={9}>
-                <Box sx={{ border: "1px solid #ddd", padding: 2 }}>
-                  <Typography variant="h6" gutterBottom>
-                    ${selectedProduct.bes_price?.toFixed(2) || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Category: {selectedProduct.bes_productGroup || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Sub-category: {selectedProduct.bes_productSubGroup || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Current Price on Amazon: $
-                    {selectedProduct.bes_price?.toFixed(2) || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Potential Profit:
-                  </Typography>
-                  <TrendIcon
-                    current={selectedProduct.bes_salesrank ?? 0}
-                    average={selectedProduct.bes_salesrank90DaysAverage ?? 0}
-                  />
-                  <Typography variant="body2" color="textSecondary">
-                    Units Sold last month:{" "}
-                    {selectedProduct.bes_boughtInPastMonth || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Rating: {selectedProduct.bes_rating || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Review Count: {selectedProduct.bes_reviewCount || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Product Link to Supplier:
-                  </Typography>
-                </Box>
+                <Paper elevation={4} sx={{ padding: 2, borderRadius: 2 }}>
+                  <Card sx={{ borderRadius: 2 }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>
+                        {selectedProductForAnalysys?.name || "Product Name"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Category: {selectedProduct.bes_productGroup || "N/A"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Sub-category:{" "}
+                        {selectedProduct.bes_productSubGroup || "N/A"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Current Price on Amazon: $
+                        {selectedProduct.bes_price?.toFixed(2) || "N/A"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Potential Profit (monthly): $
+                        {calculatePotentialProfit()} USD
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Sales Rank: {selectedProduct.bes_salesrank || "N/A"}{" "}
+                        <TrendIcon
+                          current={selectedProduct.bes_salesrank ?? 0}
+                          average={
+                            selectedProduct.bes_salesrank90DaysAverage ?? 0
+                          }
+                        />
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Sale Rank last 90 days:{" "}
+                        {selectedProduct.bes_salesrank90DaysAverage || "N/A"}
+                      </Typography>
+                      <Typography variant="h6" color="textSecondary">
+                        Bought in past month: &nbsp;
+                        {selectedProduct.bes_boughtInPastMonth
+                          ? selectedProduct.bes_boughtInPastMonth + "+"
+                          : "N/A"}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ marginBottom: 1 }}
+                      >
+                        Price Trend:{" "}
+                        <TrendIcon
+                          current={selectedProduct.bes_price ?? 0}
+                          average={
+                            selectedProduct.bes_priceBuyBox90DaysAverage ?? 0
+                          }
+                        />
+                      </Typography>
+
+                      {/* Slider para ajustar suggestedPrice */}
+                      <Box sx={{ paddingY: 2 }}>
+                        <Typography
+                          gutterBottom
+                          sx={{
+                            color:
+                              suggestedPrice > (selectedProduct.bes_price || 0)
+                                ? "red"
+                                : "inherit",
+                          }}
+                        >
+                          Suggested Price: $
+                          {parseFloat(String(suggestedPrice)).toFixed(2)} USD
+                        </Typography>
+                        <Slider
+                          value={suggestedPrice}
+                          min={selectedProductForAnalysys?.price || 0}
+                          max={(selectedProduct.bes_price || 0) * 1.5}
+                          step={0.01}
+                          onChange={(e, newValue) =>
+                            setSuggestedPrice(newValue as number)
+                          }
+                          valueLabelDisplay="auto"
+                          aria-label="Suggested Price Slider"
+                        />
+                      </Box>
+
+                      <Typography variant="body2" color="textSecondary">
+                        Profit with Suggested Price: $
+                        {(
+                          suggestedPrice -
+                          (selectedProductForAnalysys?.price || 0)
+                        ).toFixed(2)}{" "}
+                        per unit
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Paper>
               </Grid>
             </Grid>
           </Box>
@@ -286,7 +382,7 @@ const AnalyzeProduct: React.FC = () => {
               </FormControl>
             </Box>
 
-            {/* Ejemplo: Monthly Units Sold */}
+            {/* Monthly Units Sold */}
             <Typography variant="subtitle1" gutterBottom>
               Price, Units Sold, Competition
             </Typography>
@@ -298,7 +394,7 @@ const AnalyzeProduct: React.FC = () => {
               </Typography>
             )}
 
-            {/* Ejemplo: Rating and Review */}
+            {/* Rating and Review */}
             <Box mt={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Rating and Review
@@ -312,7 +408,7 @@ const AnalyzeProduct: React.FC = () => {
               )}
             </Box>
 
-            {/* Current Price Comparison (no afectada por tiempo) */}
+            {/* Current Price Comparison */}
             <Box mt={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Current Price Comparison
@@ -336,7 +432,7 @@ const AnalyzeProduct: React.FC = () => {
         >
           <Typography>No product details available.</Typography>
         </Box>
-      )}{" "}
+      )}
     </Box>
   );
 };
