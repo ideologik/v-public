@@ -68,6 +68,7 @@ export const ProductFinderPage: React.FC = () => {
 
   // Debounce para filtros: Esperar un tiempo antes de llamar a loadProducts cuando cambien los filtros
   useEffect(() => {
+    if (!isCategoriesLoaded) return;
     setPage(0);
     setProducts([]);
 
@@ -124,7 +125,7 @@ export const ProductFinderPage: React.FC = () => {
               <Grid
                 container
                 size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
-                key={product.bes_id || index}
+                key={`${product.bes_id}-${index}`}
               >
                 <ProductCard
                   product={product}

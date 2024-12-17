@@ -1,11 +1,11 @@
 // src/mappers/potentialProductMapper.ts
 
-import {
-  AliExpressProduct,
-  CJDropshippingProduct,
-} from "../types/potentialProduct";
-
 import defaultImage from "../assets/images/default-product-image.png";
+import {
+  AeMultimediaInfoDto,
+  AliExpressProduct,
+} from "../types/aliexpressProduct";
+import { CJDropshippingProduct } from "../types/cjdropshippingProduct";
 
 // Mapper para AliExpress
 // Recibe un objeto crudo de AliExpress
@@ -65,6 +65,35 @@ export function mapAliExpressProductToUnified(raw: any): AliExpressProduct {
     lastest_volume: raw.lastest_volume,
     evaluate_rate: raw.evaluate_rate,
   };
+}
+
+export function mapAeMultimediaToImages(
+  aeMultimedia?: AeMultimediaInfoDto
+): string[] {
+  const result: string[] = [];
+
+  if (!aeMultimedia) return result;
+
+  // Procesamos las imágenes
+  if (aeMultimedia.image_urls) {
+    const urls = aeMultimedia.image_urls
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    result.push(...urls);
+  }
+
+  // Procesamos los videos (si existen)
+  if (aeMultimedia.ae_video_dtos?.ae_video_d_t_o) {
+    for (const video of aeMultimedia.ae_video_dtos.ae_video_d_t_o) {
+      if (video.video_url) {
+        // Agregamos la URL del video al array de imágenes
+        result.push(video.video_url);
+      }
+    }
+  }
+
+  return result;
 }
 
 // Mapper para CJDropshipping

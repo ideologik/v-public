@@ -9,6 +9,6 @@ interface DateFilterState {
 }
 
 export const useDateFilterStore = create<DateFilterState>((set) => ({
-  dateRange: "1month",
+  dateRange: "1year",
   setDateRange: (range) => set({ dateRange: range }),
 }));

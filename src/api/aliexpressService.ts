@@ -1,10 +1,14 @@
 // src/api/aliexpressService.ts
 import axiosClient from "./axiosClient";
-import { mapAliExpressProductToUnified } from "../mappers/potentialProductMapper";
+import {
+  mapAeMultimediaToImages,
+  mapAliExpressProductToUnified,
+} from "../mappers/potentialProductMapper";
 import {
   AliExpressFindByImageResponse,
+  AliExpressGetProductByIDResponse,
   AliExpressRawProduct,
-} from "../types/potentialProduct";
+} from "../types/aliexpressProduct";
 
 // AliExpress en ProductFinder
 // POST /io/ProductFinder/AliExpressFindByText
@@ -31,6 +35,7 @@ export const aliExpressFindByImage = async (imageUrl: string) => {
       response.aliexpress_ds_image_search_response.data.products
         .traffic_image_product_d_t_o;
     const mappedProducts = rawProducts.map(mapAliExpressProductToUnified);
+
     return mappedProducts;
   } catch (error) {
     console.error("Error finding by image:", error);
@@ -38,12 +43,35 @@ export const aliExpressFindByImage = async (imageUrl: string) => {
   }
 };
 
+export const getMediaByProductId = async (productId: string | number) => {
+  try {
+    const response = await aliExpressGetProductByID(productId);
+    const productData: AliExpressGetProductByIDResponse = response;
+
+    // Extraemos el objeto multimedia
+    const multimedia =
+      productData.aliexpress_ds_product_get_response.result
+        .ae_multimedia_info_dto;
+
+    // Mapeamos a un array de imágenes (y videos si los hubiera)
+    const media = mapAeMultimediaToImages(multimedia);
+
+    return media;
+  } catch (error) {
+    console.error("Error fetching media by product ID:", error);
+    throw error;
+  }
+};
+
 // GET /io / ProductFinder / AliExpressGetProductByID;
 export const aliExpressGetProductByID = async (productId: string | number) => {
   try {
-    return await axiosClient.get("ProductFinder/AliExpressGetProductByID", {
-      params: { productId },
-    });
+    return await axiosClient.get<AliExpressGetProductByIDResponse>(
+      "ProductFinder/AliExpressGetProductByID",
+      {
+        params: { product_id: productId },
+      }
+    );
   } catch (error) {
     console.error("Error fetching AliExpress product by ID:", error);
     throw error;

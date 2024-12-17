@@ -11,7 +11,10 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { aliExpressFindByImage } from "../../../../api/aliexpressService";
+import {
+  aliExpressFindByImage,
+  getMediaByProductId,
+} from "../../../../api/aliexpressService";
 import { getCjDropshippingByImage } from "../../../../api/cjDropshippingService";
 
 import imageDefault from "../../../../assets/images/default-product-image.png";
@@ -43,8 +46,11 @@ const PotentialProductsPage: React.FC = () => {
 
   const { setSelectedProductForAnalysys } = useSelectedProductsStore();
 
-  const handleShowProductDetails = (product: any) => {
-    console.log("Product details:", product);
+  const handleShowProductDetails = async (product: UnifiedProduct) => {
+    if (product.platform === "AliExpress") {
+      const media = await getMediaByProductId((product as any).product_id);
+      product.images = media;
+    }
     setSelectedProductForAnalysys(product);
     navigate("/product-finder/analyze-product");
   };

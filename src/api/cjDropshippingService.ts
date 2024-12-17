@@ -3,7 +3,7 @@ import { mapCJDropshippingProductToUnified } from "../mappers/potentialProductMa
 import {
   CJRawProduct,
   CJSearchByImageResponse,
-} from "../types/potentialProduct";
+} from "../types/cjdropshippingProduct";
 import axiosClient from "./axiosClient";
 
 // GET /api/CJDropshipping/Status
