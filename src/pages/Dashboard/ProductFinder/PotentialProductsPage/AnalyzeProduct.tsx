@@ -115,10 +115,22 @@ const AnalyzeProduct: React.FC = () => {
     [productDetails, dateRange]
   );
 
+  function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      // hour: "2-digit",
+      // minute: "2-digit",
+      // hour12: false,
+    });
+  }
+
   const monthlySoldChartData = useMemo(() => {
     if (!filteredMonthlySold || filteredMonthlySold.length === 0) return null;
     return {
-      labels: filteredMonthlySold.map((d: any) => d.date),
+      labels: filteredMonthlySold.map((d: any) => formatDate(d.date)),
       datasets: [
         {
           label: "Monthly Units Sold",
@@ -133,7 +145,7 @@ const AnalyzeProduct: React.FC = () => {
   const ratingChartData = useMemo(() => {
     if (!filteredRating || filteredRating.length === 0) return null;
     return {
-      labels: filteredRating.map((d: any) => d.date),
+      labels: filteredRating.map((d: any) => formatDate(d.date)),
       datasets: [
         {
           label: "Rating",
@@ -478,10 +490,10 @@ const AnalyzeProduct: React.FC = () => {
               )}
             </Grid>
 
-            {/* Rating and Review */}
+            {/* Rating & Review */}
             <Grid size={{ xs: 12 }}>
               <Typography variant="subtitle1" gutterBottom>
-                Rating and Review
+                Rating & Review
               </Typography>
               {ratingChartData ? (
                 <Line data={ratingChartData} />

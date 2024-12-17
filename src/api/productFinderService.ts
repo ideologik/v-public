@@ -60,6 +60,10 @@ export const getProductDetails = async (
         params: { asin },
       }
     );
+    data.historyRating = data.historyRating?.map((item) => ({
+      ...item,
+      count: item.count ? item.count / 1000 : 0,
+    }));
     return data;
   } catch (error: unknown) {
     console.error("Error fetching product details:", error);
