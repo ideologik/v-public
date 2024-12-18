@@ -16,7 +16,7 @@ const Header = () => {
     toggleFilters();
   };
 
-  // Definimos las rutas del menú
+  // Rutas del menú
   const menuItems = [
     { label: "Products Finder", to: "/product-finder" },
     { label: "My Products", to: "/my-products" },
@@ -40,7 +40,7 @@ const Header = () => {
         >
           <img
             src={logoImage}
-            alt="VULCAN Logo"
+            alt="VULCAN"
             style={{ height: "100%", objectFit: "contain" }}
           />
         </Toolbar>

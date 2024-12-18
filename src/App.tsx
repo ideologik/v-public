@@ -6,7 +6,7 @@ import { getToken } from "./utils/auth";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import CssBaseline from "@mui/material/CssBaseline";
-import { GlobalStyles } from "@mui/material"; // Importamos GlobalStyles
+import { GlobalStyles } from "@mui/material";
 
 const App = () => {
   const { login } = useAuthStore();

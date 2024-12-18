@@ -2,17 +2,16 @@ import { UnifiedProduct } from "./potentialProduct";
 export interface AliExpressProduct extends UnifiedProduct {
   platform: "AliExpress";
 
-  // Datos de AliExpress provenientes del ejemplo:
   original_price?: string;
   product_small_image_urls?: {
     _string: string | null;
   };
   second_level_category_name?: string;
-  product_detail_url?: string; // También podría usarse como detailUrl común
+  product_detail_url?: string;
   target_sale_price?: string;
   second_level_category_id?: string;
   discount?: string;
-  product_main_image_url?: string; // Esta suele mapearse a image (usada en UnifiedProduct)
+  product_main_image_url?: string;
   first_level_category_id?: string;
   target_sale_price_currency?: string;
   original_price_currency?: string;
@@ -22,16 +21,15 @@ export interface AliExpressProduct extends UnifiedProduct {
   seller_id?: number;
   target_original_price?: string;
   product_video_url?: string;
-  first_level_category_name?: string; // Mapeada a category (UnifiedProduct)
+  first_level_category_name?: string;
   sale_price?: string;
-  product_title?: string; // Mapeado a name (UnifiedProduct)
+  product_title?: string;
   shop_id?: number;
   sale_price_currency?: string;
   lastest_volume?: string;
   evaluate_rate?: string | null;
 }
 
-// Raw product from AliExpress API
 export interface AliExpressRawProduct {
   original_price: string;
   product_small_image_urls: {
@@ -91,7 +89,7 @@ export interface AliExpressGetProductByIDResponse {
 export interface AeVideoDto {
   video_id: string;
   video_url: string;
-  [key: string]: any; // Otros campos que puedan existir
+  [key: string]: any; // otros campos
 }
 
 export interface AeVideoDtos {
@@ -100,5 +98,5 @@ export interface AeVideoDtos {
 
 export interface AeMultimediaInfoDto {
   ae_video_dtos?: AeVideoDtos | null;
-  image_urls?: string; // String con URLs separadas por punto y coma
+  image_urls?: string;
 }

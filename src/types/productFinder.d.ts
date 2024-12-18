@@ -8,7 +8,7 @@ export interface Category {
 
 export interface BestsellerProduct {
   bes_id: number;
-  bes_date: string; // ISO date
+  bes_date: string;
   bes_upc: string | null;
   bes_asin: string | null;
   bes_parentASIN: string | null;
@@ -24,11 +24,11 @@ export interface BestsellerProduct {
   bes_productThirdGroupId: number | null;
   bes_dimensions: string | null;
   bes_title: string;
-  bes_timestamp: string; // ISO date
+  bes_timestamp: string;
   bes_link: string;
   bes_amazonTitle: string | null;
   bes_brand: string | null;
-  bes_FBAFees: string | null; // JSON string
+  bes_FBAFees: string | null;
   bes_position: number | null;
   bes_boughtInPastMonth: number | null;
   bes_rating: number | null;
@@ -60,22 +60,22 @@ export interface ProductFinderParams {
   AmazonCategoryId?: number;
   AmazonSubCategoryId?: number;
   AmazonThirdCategoryId?: number;
-  priceFrom?: number; // default 0
-  priceTo?: number; // default 0
+  priceFrom?: number;
+  priceTo?: number;
   searchText?: string;
-  sort_by?: number; // integer, default?
+  sort_by?: number;
   page?: number;
   total_rows?: number;
 }
 
 // Interfaces para el histórico de datos
 export interface ProductHistoryCount {
-  date: string; // ISO date
+  date: string;
   count: number;
 }
 
 export interface ProductHistoryPrice {
-  date: string; // ISO date
+  date: string;
   price: number;
 }
 
@@ -89,7 +89,6 @@ export interface CategoryAndSalesRank {
   dateAndSalesRank: CategorySalesRank[];
 }
 
-// Respuesta de Product Details con datos históricos adicionales
 export interface BestsellerProductDetails extends BestsellerProduct {
   historyMonthlySold?: ProductHistoryCount[];
   historySellersCount?: ProductHistoryCount[];

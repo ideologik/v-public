@@ -48,12 +48,10 @@ export const getMediaByProductId = async (productId: string | number) => {
     const response = await aliExpressGetProductByID(productId);
     const productData: AliExpressGetProductByIDResponse = response;
 
-    // Extraemos el objeto multimedia
     const multimedia =
       productData.aliexpress_ds_product_get_response.result
         .ae_multimedia_info_dto;
 
-    // Mapeamos a un array de imágenes (y videos si los hubiera)
     const media = mapAeMultimediaToImages(multimedia);
 
     return media;
@@ -90,7 +88,6 @@ export const aliExpressProductEnhancer = async (productId: string | number) => {
   }
 };
 
-// AliExpress direct endpoints
 // GET /io/aliexpress/status
 export const aliexpressStatus = async () => {
   try {

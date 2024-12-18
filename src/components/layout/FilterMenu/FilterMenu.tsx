@@ -22,7 +22,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         <Box
           sx={{
             width: 250,
-            backgroundColor: "transparent", // Dejar transparente para que se vea el fondo #DDDDDD del layout
+            backgroundColor: "transparent",
             height: "100%",
             p: 1,
           }}

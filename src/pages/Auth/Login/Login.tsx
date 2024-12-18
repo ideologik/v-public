@@ -11,7 +11,7 @@ import {
   OutlinedInput,
   InputLabel,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2"; // Asegúrate que corresponde a tu versión de MUI
+import Grid from "@mui/material/Grid2";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 

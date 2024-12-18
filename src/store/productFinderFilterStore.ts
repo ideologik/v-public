@@ -13,7 +13,7 @@ interface ProductFinderFilterState {
   searchText: string;
   sortOption: string;
   isCategoriesLoaded: boolean;
-  lastLoadedAt: number | null; // Nuevo: Marca de tiempo de la última carga de datos
+  lastLoadedAt: number | null;
 
   setCategories: (categories: any[]) => void;
   setSubCategories: (sub: any[]) => void;

@@ -21,10 +21,10 @@ axiosClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para respuestas: maneja estados
+// Interceptor
 axiosClient.interceptors.response.use(
   (response) => {
-    return response.data; // Aquí ya devolvemos data directamente
+    return response.data;
   },
   (error) => {
     if (!error.response) {
@@ -64,7 +64,6 @@ axiosClient.interceptors.response.use(
   }
 );
 
-// Ahora redefinimos la interfaz del axiosClient para que sus métodos usen genéricos y retornen T directamente.
 interface CustomAxiosInstance extends AxiosInstance {
   get<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
   post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
@@ -72,5 +71,4 @@ interface CustomAxiosInstance extends AxiosInstance {
   delete<T>(url: string, config?: AxiosRequestConfig): Promise<T>;
 }
 
-// Hacemos un cast del axiosClient a nuestro tipo CustomAxiosInstance
 export default axiosClient as CustomAxiosInstance;

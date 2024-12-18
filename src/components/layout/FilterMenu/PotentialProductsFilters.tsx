@@ -1,5 +1,4 @@
 // src/components/layout/FilterMenu/PotentialProductsFilters.tsx
-
 import React from "react";
 import {
   Typography,
@@ -34,7 +33,7 @@ const PotentialProductsFilters: React.FC = () => {
   } = usePotentialProductsFilterStore();
 
   const handleSourcingPlatformChange = (e: SelectChangeEvent) => {
-    const value = e.target.value as "all" | "aliexpress" | "cj";
+    const value = e.target.value as "all" | "aliexpress" | "cj" | "walmart";
     setSourcingPlatform(value);
   };
 
@@ -42,7 +41,6 @@ const PotentialProductsFilters: React.FC = () => {
     if (value === "all") {
       setCategorySelected(null);
     } else {
-      // Aquí 'value' es el nombre de la categoría
       setCategorySelected(value);
     }
   };
@@ -91,6 +89,7 @@ const PotentialProductsFilters: React.FC = () => {
             <MenuItem value="all">All Platforms</MenuItem>
             <MenuItem value="aliexpress">AliExpress</MenuItem>
             <MenuItem value="cj">CJDropshipping</MenuItem>
+            <MenuItem value="walmart">Walmart</MenuItem>
           </Select>
         </FormControl>
 

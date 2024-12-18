@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type SourcingPlatform = "all" | "aliexpress" | "cj";
+type SourcingPlatform = "all" | "aliexpress" | "cj" | "walmart";
 
 interface ProductsFilterState {
   sourcingPlatform: SourcingPlatform;

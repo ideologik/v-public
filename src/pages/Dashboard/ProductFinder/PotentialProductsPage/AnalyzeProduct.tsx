@@ -43,7 +43,6 @@ ChartJS.register(
 
 // Función auxiliar para filtrar data según el rango
 const filterDataByRange = (data: any, range: any) => {
-  console.log("data", data);
   if (!data || data.length === 0) return [];
   if (range === "all") return data;
 
@@ -73,10 +72,18 @@ const filterDataByRange = (data: any, range: any) => {
   });
 };
 
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+}
+
 const AnalyzeProduct: React.FC = () => {
   const { selectedProduct, selectedProductForAnalysys } =
     useSelectedProductsStore();
-  console.log("selectedProduct", selectedProduct, selectedProductForAnalysys);
   const { dateRange } = useDateFilterStore();
 
   const [productDetails, setProductDetails] = useState<any>(null);
@@ -84,8 +91,6 @@ const AnalyzeProduct: React.FC = () => {
   const [suggestedPrice, setSuggestedPrice] = useState<number>(
     selectedProduct?.bes_price || 0
   );
-
-  // Estado para la imagen principal mostrada
   const [mainImage, setMainImage] = useState<string>(
     selectedProductForAnalysys?.image || imageDefault
   );
@@ -106,61 +111,17 @@ const AnalyzeProduct: React.FC = () => {
     fetchDetails();
   }, [selectedProduct]);
 
-  const filteredMonthlySold = useMemo(
-    () => filterDataByRange(productDetails?.historyMonthlySold, dateRange),
-    [productDetails, dateRange]
-  );
-  const filteredRating = useMemo(
-    () => filterDataByRange(productDetails?.historyRating, dateRange),
-    [productDetails, dateRange]
-  );
+  const calculatePotentialProfit = () => {
+    const aePrice = selectedProductForAnalysys?.price || 0;
+    const monthlySales = selectedProduct?.bes_boughtInPastMonth || 0;
+    const profitPerUnit = suggestedPrice - aePrice;
+    return (profitPerUnit * monthlySales).toFixed(2);
+  };
 
-  function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      // hour: "2-digit",
-      // minute: "2-digit",
-      // hour12: false,
-    });
-  }
-
-  const monthlySoldChartData = useMemo(() => {
-    if (!filteredMonthlySold || filteredMonthlySold.length === 0) return null;
-    return {
-      labels: filteredMonthlySold.map((d: any) => formatDate(d.date)),
-      datasets: [
-        {
-          label: "Monthly Units Sold",
-          data: filteredMonthlySold.map((d: any) => d.count),
-          borderColor: "#36A2EB",
-          fill: false,
-        },
-      ],
-    };
-  }, [filteredMonthlySold]);
-
-  const ratingChartData = useMemo(() => {
-    if (!filteredRating || filteredRating.length === 0) return null;
-    return {
-      labels: filteredRating.map((d: any) => formatDate(d.date)),
-      datasets: [
-        {
-          label: "Rating",
-          data: filteredRating.map((d: any) => d.count),
-          borderColor: "#FF6384",
-          fill: false,
-        },
-      ],
-    };
-  }, [filteredRating]);
-
+  // Data existentes
   const priceComparisonData = useMemo(() => {
     if (!selectedProduct || !selectedProductForAnalysys) return null;
     const aePrice = selectedProductForAnalysys?.price ?? 0;
-
     return {
       labels: ["Amazon", "AliExpress", "Suggested Price"],
       datasets: [
@@ -173,15 +134,6 @@ const AnalyzeProduct: React.FC = () => {
     };
   }, [selectedProduct, selectedProductForAnalysys, suggestedPrice]);
 
-  // Cálculo de la ganancia potencial
-  const calculatePotentialProfit = () => {
-    const aePrice = selectedProductForAnalysys?.price || 0;
-    const monthlySales = selectedProduct?.bes_boughtInPastMonth || 0;
-    const profitPerUnit = suggestedPrice - aePrice;
-    return (profitPerUnit * monthlySales).toFixed(2);
-  };
-
-  // Profit Margin Data
   const profitMarginData = useMemo(() => {
     if (!selectedProductForAnalysys) return null;
     const aePrice = selectedProductForAnalysys.price || 0;
@@ -205,9 +157,175 @@ const AnalyzeProduct: React.FC = () => {
     };
   }, [suggestedPrice, selectedProductForAnalysys]);
 
+  // Nuevos datasets para los 3 nuevos gráficos
+  // 1. Price & Sales trends
+  const priceSalesData = useMemo(() => {
+    if (!productDetails) return null;
+    const amazonPrice = filterDataByRange(
+      productDetails?.historyAmazonPriceTrend,
+      dateRange
+    );
+    const newPrice = filterDataByRange(
+      productDetails?.historyNewPriceTrend,
+      dateRange
+    );
+    const ebayPrice = filterDataByRange(
+      productDetails?.historyEbayPrice,
+      dateRange
+    );
+    const monthlySold = filterDataByRange(
+      productDetails?.historyMonthlySold,
+      dateRange
+    );
+
+    const allDates = new Set<string>();
+    [amazonPrice, newPrice, ebayPrice, monthlySold].forEach((series) => {
+      series?.forEach((d: any) => allDates.add(d.date));
+    });
+
+    const dateArray = Array.from(allDates).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    function getVal(series: any[], date: string, key: string) {
+      if (!series) return null;
+      const entry = series.find((d: any) => d.date === date);
+      return entry ? entry[key] : null;
+    }
+
+    const datasets = [];
+    if (amazonPrice?.length) {
+      datasets.push({
+        label: "Amazon Price",
+        data: dateArray.map((d) => getVal(amazonPrice, d, "price")),
+        borderColor: "#FF6384",
+        fill: false,
+      });
+    }
+    if (newPrice?.length) {
+      datasets.push({
+        label: "New Price",
+        data: dateArray.map((d) => getVal(newPrice, d, "price")),
+        borderColor: "#36A2EB",
+        fill: false,
+      });
+    }
+    if (ebayPrice?.length) {
+      datasets.push({
+        label: "Ebay Price",
+        data: dateArray.map((d) => getVal(ebayPrice, d, "price")),
+        borderColor: "#FFCE56",
+        fill: false,
+      });
+    }
+    if (monthlySold?.length) {
+      datasets.push({
+        label: "Monthly Units Sold",
+        data: dateArray.map((d) => getVal(monthlySold, d, "count")),
+        borderColor: "#4BC0C0",
+        fill: false,
+      });
+    }
+
+    if (datasets.length === 0) return null;
+
+    return {
+      labels: dateArray.map(formatDate),
+      datasets,
+    };
+  }, [productDetails, dateRange]);
+
+  // 2. Rating & Reviews
+  const ratingReviewData = useMemo(() => {
+    if (!productDetails) return null;
+    const reviewsCount = filterDataByRange(
+      productDetails?.historyReviewsCount,
+      dateRange
+    );
+    const rating = filterDataByRange(productDetails?.historyRating, dateRange);
+
+    const allDates = new Set<string>();
+    [reviewsCount, rating].forEach((series) => {
+      series?.forEach((d: any) => allDates.add(d.date));
+    });
+
+    const dateArray = Array.from(allDates).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    function getVal(series: any[], date: string, key: string) {
+      if (!series) return null;
+      const entry = series.find((d: any) => d.date === date);
+      return entry ? entry[key] : null;
+    }
+
+    const datasets = [];
+    if (reviewsCount?.length) {
+      datasets.push({
+        label: "Reviews Count",
+        data: dateArray.map((d) => getVal(reviewsCount, d, "count")),
+        borderColor: "#FF6384",
+        fill: false,
+      });
+    }
+    if (rating?.length) {
+      datasets.push({
+        label: "Rating",
+        data: dateArray.map((d) => getVal(rating, d, "count")),
+        borderColor: "#36A2EB",
+        fill: false,
+      });
+    }
+
+    if (datasets.length === 0) return null;
+
+    return {
+      labels: dateArray.map(formatDate),
+      datasets,
+    };
+  }, [productDetails, dateRange]);
+
+  // 3. Sales rank trends
+  const salesRankData = useMemo(() => {
+    if (!productDetails || !productDetails.categoryAndSalesRanks) return null;
+    const categorySales = productDetails.categoryAndSalesRanks;
+    const filteredCategorySales = categorySales.map((cat: any) => {
+      const filtered = filterDataByRange(cat.dateAndSalesRank, dateRange);
+      return { category_id: cat.category_id, data: filtered };
+    });
+
+    const allDates = new Set<string>();
+    filteredCategorySales.forEach((cat: any) => {
+      cat.data?.forEach((d: any) => allDates.add(d.date));
+    });
+
+    const dateArray = Array.from(allDates).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    function getVal(series: any[], date: string) {
+      if (!series) return null;
+      const entry = series.find((d: any) => d.date === date);
+      return entry ? entry.salesrank : null;
+    }
+
+    const datasets = filteredCategorySales.map((cat: any, index: number) => ({
+      label: `Category ${cat.category_id}`,
+      data: dateArray.map((d) => getVal(cat.data, d)),
+      borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+      fill: false,
+    }));
+
+    if (datasets.length === 0) return null;
+
+    return {
+      labels: dateArray.map(formatDate),
+      datasets,
+    };
+  }, [productDetails, dateRange]);
+
   return (
     <Box p={1} width="100%">
-      {/* Encabezado */}
       <Typography variant="h5" gutterBottom>
         Analyze Product
       </Typography>
@@ -222,8 +340,6 @@ const AnalyzeProduct: React.FC = () => {
         </Box>
       ) : productDetails ? (
         <>
-          {/* Primera fila: Dos columnas */}
-          {/* Primera fila: Dos columnas */}
           {/* Primera fila: Dos columnas */}
           <Box mt={2}>
             <Grid container spacing={2} width="100%" alignItems="stretch">
@@ -438,11 +554,9 @@ const AnalyzeProduct: React.FC = () => {
               </Grid>
             </Grid>
           </Box>
-
-          {/* Filas siguientes - Gráficos */}
+          {/* Current Price Comparison */}
           <Box mt={4}>
             <Grid container spacing={2}>
-              {/* Gráfico Price Comparison */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="h6" gutterBottom>
                   Current Price Comparison
@@ -456,7 +570,7 @@ const AnalyzeProduct: React.FC = () => {
                 )}
               </Grid>
 
-              {/* Gráfico Profit Margin */}
+              {/* Profit Margin */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Typography
                   variant="h6"
@@ -474,35 +588,49 @@ const AnalyzeProduct: React.FC = () => {
                 )}
               </Grid>
             </Grid>
+          </Box>
 
-            {/* Monthly Units Sold (Price, Units Sold, Competition) */}
-
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Price, Units Sold, Competition
+          {/* Filas siguientes - Gráficos */}
+          <Box mt={4}>
+            {/* 1. Price & Sales trends */}
+            <Typography variant="h6" gutterBottom>
+              Price & Sales trends
+            </Typography>
+            {priceSalesData ? (
+              <Line data={priceSalesData} />
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No data available for selected range.
               </Typography>
-              {monthlySoldChartData ? (
-                <Line data={monthlySoldChartData} />
+            )}
+
+            {/* 2. Rating & Reviews */}
+            <Box mt={4}>
+              <Typography variant="h6" gutterBottom>
+                Rating & Reviews
+              </Typography>
+              {ratingReviewData ? (
+                <Line data={ratingReviewData} />
               ) : (
                 <Typography variant="body2" color="textSecondary">
                   No data available for selected range.
                 </Typography>
               )}
-            </Grid>
+            </Box>
 
-            {/* Rating & Review */}
-            <Grid size={{ xs: 12 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Rating & Review
+            {/* 3. Sales rank trends */}
+            <Box mt={4}>
+              <Typography variant="h6" gutterBottom>
+                Sales rank trends
               </Typography>
-              {ratingChartData ? (
-                <Line data={ratingChartData} />
+              {salesRankData ? (
+                <Line data={salesRankData} />
               ) : (
                 <Typography variant="body2" color="textSecondary">
                   No data available for selected range.
                 </Typography>
               )}
-            </Grid>
+            </Box>
           </Box>
         </>
       ) : (

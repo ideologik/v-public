@@ -6,28 +6,20 @@ import {
   AliExpressProduct,
 } from "../types/aliexpressProduct";
 import { CJDropshippingProduct } from "../types/cjdropshippingProduct";
+import { WalmartRawProduct, WalmartProduct } from "../types/walmartProduct";
 
-// Mapper para AliExpress
-// Recibe un objeto crudo de AliExpress
-// y retorna un AliExpressProduct que extiende UnifiedProduct.
 export function mapAliExpressProductToUnified(raw: any): AliExpressProduct {
-  // Nombre del producto
   const name = raw.product_title || "No Name";
-  // Imagen principal
   const mainImage = raw.product_main_image_url || defaultImage;
 
-  // Para AliExpress no tenemos un array de imágenes extra en el ejemplo dado,
-  // si tuvieras más imágenes, deberías agregarlas aquí.
+  // Para AliExpress no tenemos un array de imágenes extra
   const images = [mainImage];
 
-  // Categoría y subcategoría
   const category = raw.first_level_category_name || "N/A";
   const subcategory = raw.second_level_category_name || undefined;
 
-  // Precio (parseamos target_sale_price a número)
   const price = raw.target_sale_price ? parseFloat(raw.target_sale_price) : 0;
 
-  // URL de detalle (si existe)
   const detailUrl = raw.product_detail_url || undefined;
 
   return {
@@ -83,11 +75,10 @@ export function mapAeMultimediaToImages(
     result.push(...urls);
   }
 
-  // Procesamos los videos (si existen)
+  // Videos
   if (aeMultimedia.ae_video_dtos?.ae_video_d_t_o) {
     for (const video of aeMultimedia.ae_video_dtos.ae_video_d_t_o) {
       if (video.video_url) {
-        // Agregamos la URL del video al array de imágenes
         result.push(video.video_url);
       }
     }
@@ -96,16 +87,12 @@ export function mapAeMultimediaToImages(
   return result;
 }
 
-// Mapper para CJDropshipping
-// Recibe un objeto crudo de CJDropshipping (ej: elemento del array data)
-// y retorna un CJDropshippingProduct que extiende UnifiedProduct.
 export function mapCJDropshippingProductToUnified(
   raw: any
 ): CJDropshippingProduct {
-  // Nombre del producto
   const name = raw.nameEn || "No Name";
 
-  // Parseamos las imágenes desde 'image' (un string JSON)
+  //  'image' (un string JSON)
   let images: string[] = [];
   try {
     const parsedImages = JSON.parse(raw.image);
@@ -119,7 +106,6 @@ export function mapCJDropshippingProductToUnified(
 
   const mainImage = images[0];
 
-  // Categoría y subcategoría
   let category = "N/A";
   let subcategory: string | undefined = undefined;
   if (raw.category) {
@@ -130,7 +116,6 @@ export function mapCJDropshippingProductToUnified(
     }
   }
 
-  // Precio: tomamos el valor mínimo si es un rango
   let price = 0;
   if (raw.sellPrice) {
     const priceParts = raw.sellPrice
@@ -139,10 +124,9 @@ export function mapCJDropshippingProductToUnified(
     price = priceParts.length > 0 && !isNaN(priceParts[0]) ? priceParts[0] : 0;
   }
 
-  // No se provee detailUrl en el ejemplo de CJ, dejamos undefined
+  // TODO: 'detailUrl' armarlo con el ID del producto
   const detailUrl = undefined;
 
-  // Parseamos arrays desde JSON (si son strings JSON):
   const parseJsonArray = (str: string | undefined): string[] | undefined => {
     if (!str) return undefined;
     try {
@@ -206,5 +190,105 @@ export function mapCJDropshippingProductToUnified(
     productType: raw.productType,
     listedNum: raw.listedNum,
     createAt: raw.createAt,
+  };
+}
+
+export function mapWalmartProductToUnified(
+  raw: WalmartRawProduct
+): WalmartProduct {
+  const name = raw.name || "No Name";
+
+  const images: string[] = [];
+  if (Array.isArray(raw.imageEntities) && raw.imageEntities.length > 0) {
+    for (const img of raw.imageEntities) {
+      if (img.largeImage) {
+        images.push(img.largeImage);
+      } else if (img.mediumImage) {
+        images.push(img.mediumImage);
+      } else if (img.thumbnailImage) {
+        images.push(img.thumbnailImage);
+      }
+    }
+  } else {
+    if (raw.largeImage) images.push(raw.largeImage);
+    else if (raw.mediumImage) images.push(raw.mediumImage);
+    else if (raw.thumbnailImage) images.push(raw.thumbnailImage);
+  }
+
+  if (images.length === 0) {
+    images.push(defaultImage);
+  }
+
+  const mainImage = images[0];
+
+  let category = "N/A";
+  let subcategory: string | undefined = undefined;
+  if (raw.categoryPath) {
+    const parts = raw.categoryPath.split("/");
+    category = parts[0]?.trim() || "N/A";
+    if (parts[1]) {
+      subcategory = parts[1]?.trim();
+    }
+  }
+
+  // Precio: si no hay salePrice, uso msrp ¿es ok?
+  const price = raw.salePrice ?? raw.msrp ?? 0;
+
+  // armar el URL de detalle
+  const detailUrl = undefined;
+
+  return {
+    platform: "WalMart",
+    name,
+    image: mainImage,
+    images,
+    price,
+    category,
+    subcategory,
+    detailUrl,
+    // Campos específicos de Walmart
+    itemId: raw.itemId,
+    parentItemId: raw.parentItemId,
+    msrp: raw.msrp,
+    salePrice: raw.salePrice,
+    upc: raw.upc,
+    categoryPath: raw.categoryPath,
+    shortDescription: raw.shortDescription,
+    longDescription: raw.longDescription,
+    brandName: raw.brandName,
+    thumbnailImage: raw.thumbnailImage,
+    mediumImage: raw.mediumImage,
+    largeImage: raw.largeImage,
+    productTrackingUrl: raw.productTrackingUrl,
+    ninentySevenCentShipping: raw.ninentySevenCentShipping,
+    standardShipRate: raw.standardShipRate,
+    size: raw.size,
+    color: raw.color,
+    marketplace: raw.marketplace,
+    modelNumber: raw.modelNumber,
+    sellerInfo: raw.sellerInfo,
+    seller: raw.seller,
+    customerRating: raw.customerRating,
+    numReviews: raw.numReviews,
+    categoryNode: raw.categoryNode,
+    bundle: raw.bundle,
+    clearance: raw.clearance,
+    preOrder: raw.preOrder,
+    stock: raw.stock,
+    freight: raw.freight,
+    gender: raw.gender,
+    age: raw.age,
+    affiliateAddToCartUrl: raw.affiliateAddToCartUrl,
+    freeShippingOver35Dollars: raw.freeShippingOver35Dollars,
+    maxItemsInOrder: raw.maxItemsInOrder,
+    giftOptions: raw.giftOptions,
+    imageEntities: raw.imageEntities,
+    offerType: raw.offerType,
+    isEDelivery: raw.isEDelivery,
+    availableOnline: raw.availableOnline,
+    offerId: raw.offerId,
+    warnings: raw.warnings,
+    productClassType: raw.productClassType,
+    warranty: raw.warranty,
   };
 }

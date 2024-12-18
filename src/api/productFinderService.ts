@@ -64,6 +64,28 @@ export const getProductDetails = async (
       ...item,
       count: item.count ? item.count / 1000 : 0,
     }));
+    data.historyRating = data.historyRating?.filter(
+      (item) => item.count !== -1 && item.count !== -0.01
+    );
+    data.historyMonthlySold = data.historyMonthlySold?.filter(
+      (item) => item.count !== -1 && item.count !== -0.01
+    );
+    data.historySellersCount = data.historySellersCount?.filter(
+      (item) => item.count !== -1 && item.count !== -0.01
+    );
+    data.historyReviewsCount = data.historyReviewsCount?.filter(
+      (item) => item.count !== -1 && item.count !== -0.01
+    );
+    data.historyAmazonPriceTrend = data.historyAmazonPriceTrend?.filter(
+      (item) => item.price !== -1 && item.price !== -0.01
+    );
+    data.historyNewPriceTrend = data.historyNewPriceTrend?.filter(
+      (item) => item.price !== -1 && item.price !== -0.01
+    );
+    data.historyEbayPrice = data.historyEbayPrice?.filter(
+      (item) => item.price !== -1 && item.price !== -0.01
+    );
+
     return data;
   } catch (error: unknown) {
     console.error("Error fetching product details:", error);
@@ -95,7 +117,6 @@ export const getProductFinderCategories = async (
 };
 
 // GET /io/ProductFinder/SubCategories
-
 export const getProductFinderSubCategories = async (
   parent_categoryId: number,
   includeChild = true
@@ -141,7 +162,6 @@ export const getProductFinderPriceRange = async (): Promise<PriceRangeData> => {
 };
 
 // GET /io/ProductFinder/GenerateProductImage
-
 interface GenerateProductImageData {
   imageUrl: string;
 }

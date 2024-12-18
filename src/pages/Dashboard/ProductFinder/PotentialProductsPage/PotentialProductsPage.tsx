@@ -11,10 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import {
-  aliExpressFindByImage,
-  getMediaByProductId,
-} from "../../../../api/aliexpressService";
+
 import { getCjDropshippingByImage } from "../../../../api/cjDropshippingService";
 
 import imageDefault from "../../../../assets/images/default-product-image.png";
@@ -22,6 +19,12 @@ import { TrendIcon } from "../../../../components/common/TrendIcon";
 import { UnifiedProduct } from "../../../../types/potentialProduct";
 import { useSelectedProductsStore } from "../../../../store/selectedProductsStore";
 import { usePotentialProductsFilterStore } from "../../../../store/potentialProductsFilterStore";
+
+import { walmartGetByUpc } from "../../../../api/walmartService";
+import {
+  getMediaByProductId,
+  aliExpressFindByImage,
+} from "../../../../api/aliexpressService";
 
 const PotentialProductsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -74,10 +77,34 @@ const PotentialProductsPage: React.FC = () => {
           fetchedProducts = await getCjDropshippingByImage(
             selectedProductImage
           );
+        } else if (sourcingPlatform === "walmart") {
+          if (selectedProduct.bes_upc) {
+            fetchedProducts = await walmartGetByUpc(selectedProduct.bes_upc);
+          }
         } else {
-          const ae = await aliExpressFindByImage(selectedProductImage);
-          const cj = await getCjDropshippingByImage(selectedProductImage);
-          fetchedProducts = [...ae, ...cj];
+          let wp: UnifiedProduct[] = [];
+          try {
+            if (selectedProduct.bes_upc) {
+              wp = await walmartGetByUpc(selectedProduct.bes_upc);
+            }
+          } catch (error) {
+            console.error("Error fetching from Walmart:", error);
+          }
+
+          let ae: UnifiedProduct[] = [];
+          try {
+            ae = await aliExpressFindByImage(selectedProductImage);
+          } catch (error) {
+            console.error("Error fetching from AliExpress:", error);
+          }
+
+          let cj: UnifiedProduct[] = [];
+          try {
+            cj = await getCjDropshippingByImage(selectedProductImage);
+          } catch (error) {
+            console.error("Error fetching from CJDropshipping:", error);
+          }
+          fetchedProducts = [...ae, ...cj, ...wp];
         }
 
         // Extraer categorías únicas
