@@ -161,6 +161,7 @@ const AnalyzeProduct: React.FC = () => {
   // 1. Price & Sales trends
   const priceSalesData = useMemo(() => {
     if (!productDetails) return null;
+
     const amazonPrice = filterDataByRange(
       productDetails?.historyAmazonPriceTrend,
       dateRange
@@ -169,17 +170,13 @@ const AnalyzeProduct: React.FC = () => {
       productDetails?.historyNewPriceTrend,
       dateRange
     );
-    const ebayPrice = filterDataByRange(
-      productDetails?.historyEbayPrice,
-      dateRange
-    );
     const monthlySold = filterDataByRange(
       productDetails?.historyMonthlySold,
       dateRange
     );
 
     const allDates = new Set<string>();
-    [amazonPrice, newPrice, ebayPrice, monthlySold].forEach((series) => {
+    [amazonPrice, newPrice, monthlySold].forEach((series) => {
       series?.forEach((d: any) => allDates.add(d.date));
     });
 
@@ -193,41 +190,32 @@ const AnalyzeProduct: React.FC = () => {
       return entry ? entry[key] : null;
     }
 
-    const datasets = [];
-    if (amazonPrice?.length) {
-      datasets.push({
+    const datasets = [
+      {
         label: "Amazon Price",
         data: dateArray.map((d) => getVal(amazonPrice, d, "price")),
         borderColor: "#FF6384",
         fill: false,
-      });
-    }
-    if (newPrice?.length) {
-      datasets.push({
+        yAxisID: "y-amazon",
+        spanGaps: true,
+      },
+      {
         label: "New Price",
         data: dateArray.map((d) => getVal(newPrice, d, "price")),
         borderColor: "#36A2EB",
         fill: false,
-      });
-    }
-    if (ebayPrice?.length) {
-      datasets.push({
-        label: "Ebay Price",
-        data: dateArray.map((d) => getVal(ebayPrice, d, "price")),
-        borderColor: "#FFCE56",
-        fill: false,
-      });
-    }
-    if (monthlySold?.length) {
-      datasets.push({
+        yAxisID: "y-newprice",
+        spanGaps: true,
+      },
+      {
         label: "Monthly Units Sold",
         data: dateArray.map((d) => getVal(monthlySold, d, "count")),
         borderColor: "#4BC0C0",
         fill: false,
-      });
-    }
-
-    if (datasets.length === 0) return null;
+        yAxisID: "y-units",
+        spanGaps: true,
+      },
+    ];
 
     return {
       labels: dateArray.map(formatDate),
@@ -266,6 +254,8 @@ const AnalyzeProduct: React.FC = () => {
         data: dateArray.map((d) => getVal(reviewsCount, d, "count")),
         borderColor: "#FF6384",
         fill: false,
+        yAxisID: "y-reviews",
+        spanGaps: true,
       });
     }
     if (rating?.length) {
@@ -274,6 +264,8 @@ const AnalyzeProduct: React.FC = () => {
         data: dateArray.map((d) => getVal(rating, d, "count")),
         borderColor: "#36A2EB",
         fill: false,
+        yAxisID: "y-rating",
+        spanGaps: true,
       });
     }
 
@@ -284,6 +276,41 @@ const AnalyzeProduct: React.FC = () => {
       datasets,
     };
   }, [productDetails, dateRange]);
+
+  const ratingReviewOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+    },
+    scales: {
+      "y-reviews": {
+        type: "linear",
+        display: true,
+        position: "left",
+        title: {
+          display: true,
+          text: "Reviews Count",
+        },
+        grid: {
+          drawOnChartArea: true,
+        },
+      },
+      "y-rating": {
+        type: "linear",
+        display: true,
+        position: "right",
+        title: {
+          display: true,
+          text: "Rating",
+        },
+        grid: {
+          drawOnChartArea: false,
+        },
+      },
+    },
+  };
 
   // 3. Sales rank trends
   const salesRankData = useMemo(() => {
@@ -314,15 +341,45 @@ const AnalyzeProduct: React.FC = () => {
       data: dateArray.map((d) => getVal(cat.data, d)),
       borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
       fill: false,
+      yAxisID: `y-category-${cat.category_id}`,
+      spanGaps: true,
     }));
-
-    if (datasets.length === 0) return null;
 
     return {
       labels: dateArray.map(formatDate),
       datasets,
     };
   }, [productDetails, dateRange]);
+
+  const salesRankOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+    },
+    scales: {
+      ...productDetails?.categoryAndSalesRanks.reduce(
+        (acc: any, cat: any, index: number) => {
+          acc[`y-category-${cat.category_id}`] = {
+            type: "linear",
+            display: true,
+            position: index % 2 === 0 ? "left" : "right",
+            title: {
+              display: true,
+              text: `Category ${cat.category_id}`,
+            },
+            grid: {
+              drawOnChartArea: index === 0, // Solo la primera categoría muestra la cuadrícula
+            },
+            offset: true, // Desplazar para evitar solapamiento
+          };
+          return acc;
+        },
+        {}
+      ),
+    },
+  };
 
   return (
     <Box p={1} width="100%">
