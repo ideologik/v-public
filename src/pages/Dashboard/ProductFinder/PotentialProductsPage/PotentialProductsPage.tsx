@@ -294,7 +294,7 @@ const PotentialProductsPage: React.FC = () => {
                     />
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Bought in past month: &nbsp;
+                    Sold last month: &nbsp;
                     {selectedProduct.bes_boughtInPastMonth
                       ? selectedProduct.bes_boughtInPastMonth + "+"
                       : "N/A"}

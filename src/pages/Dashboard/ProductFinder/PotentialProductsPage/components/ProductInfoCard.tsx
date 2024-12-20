@@ -1,5 +1,12 @@
 import React from "react";
-import { Card, CardContent, Typography, Box, Slider } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Slider,
+  Link,
+} from "@mui/material";
 import { TrendIcon } from "../../../../../components/common/TrendIcon";
 
 interface ProductInfoCardProps {
@@ -79,7 +86,7 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({
           {selectedProduct.bes_salesrank90DaysAverage || "N/A"}
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Bought in past month: &nbsp;
+          Sold last month: &nbsp;
           {selectedProduct.bes_boughtInPastMonth
             ? selectedProduct.bes_boughtInPastMonth + "+"
             : "N/A"}
@@ -128,6 +135,32 @@ const ProductInfoCard: React.FC<ProductInfoCardProps> = ({
           )}{" "}
           per unit
         </Typography>
+
+        {/* Links */}
+        <Box sx={{ marginTop: 2 }}>
+          {selectedProduct.bes_link && (
+            <Typography variant="body2" color="primary">
+              <Link
+                href={selectedProduct.bes_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View on Amazon
+              </Link>
+            </Typography>
+          )}
+          {selectedProductForAnalysys?.product_detail_url && (
+            <Typography variant="body2" color="primary">
+              <Link
+                href={selectedProductForAnalysys.product_detail_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View Shop on {selectedProductForAnalysys.platform}
+              </Link>
+            </Typography>
+          )}
+        </Box>
       </CardContent>
     </Card>
   );

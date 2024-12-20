@@ -19,7 +19,7 @@ const SalesRankChart: React.FC<SalesRankChartProps> = ({
     return (
       <>
         <Typography variant="h6" gutterBottom>
-          Sales rank trends
+          Sales Rank Trends
         </Typography>
         <Typography variant="body2" color="textSecondary">
           No data available for selected range.
@@ -69,27 +69,27 @@ const SalesRankChart: React.FC<SalesRankChartProps> = ({
     return entry ? entry.salesrank : null;
   }
 
-  const datasets: ChartData<"line">["datasets"] = filteredCategorySales.map(
-    (cat: any, index: number) => ({
-      label: cat.categoryName ?? `Category ${cat.category_id}`,
-      data: dateArray.map((d) => getVal(cat.data, d)),
-      borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-      fill: false,
-      yAxisID: `y-category-${cat.category_id}`,
-      spanGaps: true,
+  const datasets: ChartData<"line">["datasets"] = filteredCategorySales
+    .map((cat: any, index: number) => {
+      const data = dateArray.map((d) => getVal(cat.data, d));
+      const hasData = data.some((val) => val !== null); // Verificar si hay datos válidos
+      if (!hasData) return null; // Excluir datasets vacíos
+      return {
+        label: cat.categoryName ?? `Category ${cat.category_id}`,
+        data,
+        borderColor: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+        fill: false,
+        yAxisID: `y-category-${cat.category_id}`,
+        spanGaps: true,
+      };
     })
-  );
+    .filter((ds): ds is NonNullable<typeof ds> => ds !== null); // Filtrar los datasets nulos
 
-  if (
-    datasets.length === 0 ||
-    datasets.every(
-      (ds) => Array.isArray(ds.data) && ds.data.every((val) => val === null)
-    )
-  ) {
+  if (datasets.length === 0) {
     return (
       <>
         <Typography variant="h6" gutterBottom>
-          Sales rank trends
+          Sales Rank Trends
         </Typography>
         <Typography variant="body2" color="textSecondary">
           No data available for selected range.
@@ -134,7 +134,7 @@ const SalesRankChart: React.FC<SalesRankChartProps> = ({
   return (
     <>
       <Typography variant="h6" gutterBottom>
-        Sales rank trends
+        Sales Rank Trends
       </Typography>
       <Line data={data} options={options} />
     </>

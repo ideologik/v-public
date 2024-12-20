@@ -45,26 +45,32 @@ const RatingReviewsChart: React.FC<RatingReviewsChartProps> = ({
 
   const datasets: ChartData<"line">["datasets"] = [];
 
-  if (reviewsCount?.length) {
-    datasets.push({
-      label: "Reviews Count",
-      data: dateArray.map((d) => getVal(reviewsCount, d, "count")),
-      borderColor: "#FF6384",
-      fill: false,
-      yAxisID: "y-reviews",
-      spanGaps: true,
-    });
+  if (reviewsCount.length > 0) {
+    const data = dateArray.map((d) => getVal(reviewsCount, d, "count"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
+        label: "Reviews Count",
+        data,
+        borderColor: "#FF6384", // Rojo
+        fill: false,
+        yAxisID: "y-reviews",
+        spanGaps: true,
+      });
+    }
   }
 
-  if (rating?.length) {
-    datasets.push({
-      label: "Rating",
-      data: dateArray.map((d) => getVal(rating, d, "count")),
-      borderColor: "#36A2EB",
-      fill: false,
-      yAxisID: "y-rating",
-      spanGaps: true,
-    });
+  if (rating.length > 0) {
+    const data = dateArray.map((d) => getVal(rating, d, "count"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
+        label: "Rating",
+        data,
+        borderColor: "#36A2EB", // Azul
+        fill: false,
+        yAxisID: "y-rating",
+        spanGaps: true,
+      });
+    }
   }
 
   if (datasets.length === 0) {
@@ -101,9 +107,6 @@ const RatingReviewsChart: React.FC<RatingReviewsChartProps> = ({
           display: true,
           text: "Reviews Count",
         },
-        grid: {
-          drawOnChartArea: true,
-        },
       },
       "y-rating": {
         type: "linear",
@@ -112,9 +115,6 @@ const RatingReviewsChart: React.FC<RatingReviewsChartProps> = ({
         title: {
           display: true,
           text: "Rating",
-        },
-        grid: {
-          drawOnChartArea: false,
         },
       },
     },

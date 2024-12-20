@@ -116,26 +116,6 @@ const AnalyzeProduct: React.FC = () => {
             </Grid>
           </Box>
 
-          {/* Gráficos de barra */}
-          <Box mt={4}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <PriceComparisonChart
-                  selectedProduct={selectedProduct}
-                  selectedProductForAnalysys={selectedProductForAnalysys}
-                  suggestedPrice={suggestedPrice}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <ProfitMarginChart
-                  selectedProductForAnalysys={selectedProductForAnalysys}
-                  suggestedPrice={suggestedPrice}
-                />
-              </Grid>
-            </Grid>
-          </Box>
-
           {/* Gráficos de líneas */}
           <Box mt={4}>
             <PriceSalesChart
@@ -156,6 +136,25 @@ const AnalyzeProduct: React.FC = () => {
                 dateRange={dateRange}
               />
             </Box>
+          </Box>
+          {/* Gráficos de barra */}
+          <Box mt={4}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <PriceComparisonChart
+                  selectedProduct={selectedProduct}
+                  selectedProductForAnalysys={selectedProductForAnalysys}
+                  suggestedPrice={suggestedPrice}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <ProfitMarginChart
+                  selectedProductForAnalysys={selectedProductForAnalysys}
+                  suggestedPrice={suggestedPrice}
+                />
+              </Grid>
+            </Grid>
           </Box>
         </>
       ) : (

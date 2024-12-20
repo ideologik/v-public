@@ -40,7 +40,7 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
   );
 
   const allDates = new Set<string>();
-  [amazonPrice, newPrice, monthlySold].forEach((series) => {
+  [amazonPrice, newPrice, ebayPrice, monthlySold].forEach((series) => {
     series?.forEach((d: any) => allDates.add(d.date));
   });
 
@@ -54,42 +54,80 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
     return entry ? entry[key] : null;
   }
 
-  const data: ChartData<"line"> = {
-    labels: dateArray.map(formatDate),
-    datasets: [
-      {
+  const datasets: ChartData<"line">["datasets"] = [];
+
+  if (amazonPrice.length > 0) {
+    const data = dateArray.map((d) => getVal(amazonPrice, d, "price"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
         label: "Amazon Price",
-        data: dateArray.map((d) => getVal(amazonPrice, d, "price")),
+        data,
         borderColor: "#FF5733", // Naranja
         fill: false,
         yAxisID: "y-amazon",
         spanGaps: true,
-      },
-      {
+      });
+    }
+  }
+
+  if (newPrice.length > 0) {
+    const data = dateArray.map((d) => getVal(newPrice, d, "price"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
         label: "New Price",
-        data: dateArray.map((d) => getVal(newPrice, d, "price")),
+        data,
         borderColor: "#2ECC71", // Verde
         fill: false,
         yAxisID: "y-newprice",
         spanGaps: true,
-      },
-      {
+      });
+    }
+  }
+
+  if (ebayPrice.length > 0) {
+    const data = dateArray.map((d) => getVal(ebayPrice, d, "price"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
         label: "Ebay Price",
-        data: dateArray.map((d) => getVal(ebayPrice, d, "price")),
+        data,
         borderColor: "#3498DB", // Azul claro
         fill: false,
         yAxisID: "y-ebayprice",
         spanGaps: true,
-      },
-      {
+      });
+    }
+  }
+
+  if (monthlySold.length > 0) {
+    const data = dateArray.map((d) => getVal(monthlySold, d, "count"));
+    if (data.some((val) => val !== null)) {
+      datasets.push({
         label: "Monthly Units Sold",
-        data: dateArray.map((d) => getVal(monthlySold, d, "count")),
+        data,
         borderColor: "#9B59B6", // Morado
         fill: false,
         yAxisID: "y-units",
         spanGaps: true,
-      },
-    ],
+      });
+    }
+  }
+
+  if (datasets.length === 0) {
+    return (
+      <>
+        <Typography variant="h6" gutterBottom>
+          Price & Sales Trends
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          No data available for selected range.
+        </Typography>
+      </>
+    );
+  }
+
+  const data: ChartData<"line"> = {
+    labels: dateArray.map(formatDate),
+    datasets,
   };
 
   const options: ChartOptions<"line"> = {
@@ -108,9 +146,6 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
           display: true,
           text: "Amazon Price",
         },
-        grid: {
-          drawOnChartArea: true,
-        },
       },
       "y-newprice": {
         type: "linear",
@@ -119,9 +154,6 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
         title: {
           display: true,
           text: "New Price",
-        },
-        grid: {
-          drawOnChartArea: false, // evita que se superpongan las líneas de fondo
         },
       },
       "y-ebayprice": {
@@ -132,9 +164,6 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
           display: true,
           text: "Ebay Price",
         },
-        grid: {
-          drawOnChartArea: false, // evita que se superpongan las líneas de fondo
-        },
       },
       "y-units": {
         type: "linear",
@@ -144,29 +173,16 @@ const PriceSalesChart: React.FC<PriceSalesChartProps> = ({
           display: true,
           text: "Monthly Units Sold",
         },
-        grid: {
-          drawOnChartArea: false,
-        },
       },
     },
   };
 
-  const hasData = data.datasets.some(
-    (ds) => Array.isArray(ds.data) && ds.data.some((val) => val !== null)
-  );
-
   return (
     <>
       <Typography variant="h6" gutterBottom>
-        Price & Sales trends
+        Price & Sales Trends
       </Typography>
-      {hasData ? (
-        <Line data={data} options={options} />
-      ) : (
-        <Typography variant="body2" color="textSecondary">
-          No data available for selected range.
-        </Typography>
-      )}
+      <Line data={data} options={options} />
     </>
   );
 };
